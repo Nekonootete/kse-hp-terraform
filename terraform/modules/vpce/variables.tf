@@ -1,0 +1,8 @@
+variable "environment"             { type = string }
+variable "project_name"            { type = string }
+variable "region"                  { type = string }
+variable "vpc_id"                  { type = string }
+variable "private_subnet_ids"      { type = list(string) }
+variable "private_route_table_ids" { type = list(string) }
+variable "sg_ecr_vpce_ids"         { type = list(string) }
+variable "sg_cwlogs_vpce_ids"      { type = list(string) }

@@ -1,0 +1,16 @@
+environment             = "stg"
+project_name            = "kse-hp"
+region                  = "ap-northeast-1"
+vpc_cidr                = "10.10.0.0/16"
+public_subnet_cidrs     = ["10.10.1.0/24", "10.10.2.0/24"]
+private_subnet_cidrs    = ["10.10.3.0/24", "10.10.4.0/24"]
+public_subnet_azs       = ["ap-northeast-1a", "ap-northeast-1c"]
+private_subnet_azs      = ["ap-northeast-1a", "ap-northeast-1c"]
+app_ports               = [3000, 3001]
+db_name                 = "app"
+db_username             = "app"
+env_file_name           = ".env"
+api_sub_domain          = "stg-api"
+domain_name             = "sr-kse.com"
+service_cloud_map_next  = "next"
+service_cloud_map_rails = "rails"

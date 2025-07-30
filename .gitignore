@@ -1,0 +1,55 @@
+###############################################################################
+#  Terraform  (infra/)
+###############################################################################
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/*.tfplan
+infra/crash.log
+
+###############################################################################
+#  共通ゴミ・一時ファイル
+###############################################################################
+# OS
+.DS_Store
+Thumbs.db
+
+# エディター
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# ログ
+*.log
+
+# 証明書 / 鍵
+*.pem
+*.key
+*.crt
+
+# Terraform state
+*.tfstate
+*.tfstate.*
+
+# Terraform crash log
+crash.log
+
+# Terraform plan file
+*.tfplan
+
+# Terraform override files
+*.override.tf
+*.override.tf.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# .terraform directory (providers, plugin cache, etc.)
+.terraform/
+
+# sensitive .env files if any
+.env
+.env.*

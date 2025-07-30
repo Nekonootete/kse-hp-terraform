@@ -1,0 +1,8 @@
+variable "environment"           { type = string }
+variable "project_name"          { type = string }
+variable "port_next"             { type = number }
+variable "port_rails"            { type = number }
+variable "vpc_id"                { type = string }
+variable "public_subnet_ids"     { type = list(string) }
+variable "alb_security_group_id" { type = string }
+variable "acm_cert_arn"          { type = string }
