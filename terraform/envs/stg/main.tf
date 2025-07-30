@@ -20,6 +20,25 @@ data "terraform_remote_state" "global" {
   }
 }
 
+locals {
+  app_params = {
+    next_ecr_url            = module.ecr_next.repository_url
+    rails_ecr_url           = module.ecr_rails.repository_url
+    cluster_name            = module.cluster.cluster_name
+    next_task_def           = module.task_next.task_definition_arn
+    rails_task_def          = module.task_rails.task_definition_arn
+    next_service_name       = module.service_next.service_name
+    rails_service_name      = module.service_rails.service_name
+    rails_container_name    = module.task_rails.container_name
+    rails_subnet_id         = module.network.private_subnet_ids[0]
+    rails_sg_id             = module.security.sg_rails_id
+    api_sub_domain          = var.api_sub_domain
+    domain_name             = var.domain_name
+    service_cloud_map_rails = var.service_cloud_map_rails
+    private_dns_id          = module.private_dns.private_dns_id
+  }
+}
+
 module "network" {
   source               = "../../modules/network"
   environment          = var.environment
@@ -204,4 +223,11 @@ module "service_rails" {
   private_dns_id      = module.private_dns.private_dns_id
   service_cloud_map   = var.service_cloud_map_rails
   desired_count       = 1
+}
+
+module "ssm" {
+  source          = "../../modules/ssm"
+  project_name    = var.project_name
+  environment     = var.environment
+  app_params      = local.app_params
 }
