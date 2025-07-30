@@ -22,20 +22,20 @@ data "terraform_remote_state" "global" {
 
 locals {
   app_params = {
-    next_ecr_url            = module.ecr_next.repository_url
-    rails_ecr_url           = module.ecr_rails.repository_url
-    cluster_name            = module.cluster.cluster_name
-    next_task_def           = module.task_next.task_definition_arn
-    rails_task_def          = module.task_rails.task_definition_arn
-    next_service_name       = module.service_next.service_name
-    rails_service_name      = module.service_rails.service_name
-    rails_container_name    = module.task_rails.container_name
-    rails_subnet_id         = module.network.private_subnet_ids[0]
-    rails_sg_id             = module.security.sg_rails_id
-    api_sub_domain          = var.api_sub_domain
-    domain_name             = var.domain_name
-    service_cloud_map_rails = var.service_cloud_map_rails
-    private_dns_id          = module.private_dns.private_dns_id
+    NEXT_ECR_URL            = module.ecr_next.repository_url
+    RAILS_ECR_URL           = module.ecr_rails.repository_url
+    CLUSTER_NAME            = module.cluster.cluster_name
+    NEXT_TASK_DEF           = module.task_next.task_definition_arn
+    RAILS_TASK_DEF          = module.task_rails.task_definition_arn
+    NEXT_SERVICE_NAME       = module.service_next.service_name
+    RAILS_SERVICE_NAME      = module.service_rails.service_name
+    RAILS_CONTAINER_NAME    = module.task_rails.container_name
+    RAILS_SUBNET_ID         = module.network.private_subnet_ids[0]
+    RAILS_SG_ID             = module.security.sg_rails_id
+    API_SUB_DOMAIN          = var.api_sub_domain
+    DOMAIN_NAME             = var.domain_name
+    SERVICE_CLOUD_MAP_RAILS = var.service_cloud_map_rails
+    PRIVATE_DNS_ID          = module.private_dns.private_dns_id
   }
 }
 

@@ -1,7 +1,7 @@
 resource "aws_ssm_parameter" "app" {
   for_each = var.app_params
 
-  name        = "/${ var.project_name }-${ var.environment }/prod/${ each.key }"
+  name        = "/${ var.project_name }-github/${ var.environment }/${ each.key }"
   type        = "String"
   value       = each.value
 
