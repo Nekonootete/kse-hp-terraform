@@ -50,12 +50,13 @@ jobs:
 
       - name: Get outputs
         run: |
-          echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)"     >> $GITHUB_ENV
-          echo "DB_NAME=$(terraform output -raw db_name)"               >> $GITHUB_ENV
-          echo "DB_USERNAME=$(terraform output -raw db_username)"       >> $GITHUB_ENV
-          echo "RDS_SSM_NAME=$(terraform output -raw rds_ssm_name)"     >> $GITHUB_ENV
-          echo "STOR_BUCKET_ID=$(terraform output -raw stor_bucket_id)" >> $GITHUB_ENV
-          echo "ENV_BUCKET_ID=$(terraform output -raw env_bucket_id)"   >> $GITHUB_ENV
+          keys=(rds_endpoint db_name db_username rds_ssm_name stor_bucket_id env_bucket_id)
+          for key in "${keys[@]}"; do
+            val="$(terraform output -raw "$key")"
+            echo "::add-mask::$val"
+            name="$(echo "$key" | tr 'a-z' 'A-Z')"
+            echo "${name}=$val" >> "$GITHUB_ENV"
+          done
 
       - name: Get DB password from SSM
         id: dbpw
