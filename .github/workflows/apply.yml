@@ -51,26 +51,12 @@ jobs:
       - name: Get outputs
         id: tf_outputs
         run: |
-          echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)"                       >> $GITHUB_ENV
-          echo "DB_NAME=$(terraform output -raw db_name)"                                 >> $GITHUB_ENV
-          echo "DB_USERNAME=$(terraform output -raw db_username)"                         >> $GITHUB_ENV
-          echo "RDS_SSM_NAME=$(terraform output -raw rds_ssm_name)"                       >> $GITHUB_ENV
-          echo "STOR_BUCKET_ID=$(terraform output -raw stor_bucket_id)"                   >> $GITHUB_ENV
-          echo "ENV_BUCKET_ID=$(terraform output -raw env_bucket_id)"                     >> $GITHUB_ENV
-          echo "NEXT_ECR_URL=$(terraform output -raw next_ecr_url)"                       >> $GITHUB_ENV
-          echo "RAILS_ECR_URL=$(terraform output -raw rails_ecr_url)"                     >> $GITHUB_ENV
-          echo "CLUSTER_NAME=$(terraform output -raw cluster_name)"                       >> $GITHUB_ENV
-          echo "NEXT_SERVICE_NAME=$(terraform output -raw next_service_name)"             >> $GITHUB_ENV
-          echo "RAILS_SERVICE_NAME=$(terraform output -raw rails_service_name)"           >> $GITHUB_ENV
-          echo "NEXT_TASK_DEF_ARN=$(terraform output -raw next_task_def_arn)"             >> $GITHUB_ENV
-          echo "RAILS_TASK_DEF_ARN=$(terraform output -raw rails_task_def_arn)"           >> $GITHUB_ENV
-          echo "RAILS_CONTAINER_NAME=$(terraform output -raw rails_container_name)"       >> $GITHUB_ENV
-          echo "RAILS_SUBNET_ID=$(terraform output -raw rails_subnet_id)"                 >> $GITHUB_ENV
-          echo "RAILS_SG_ID=$(terraform output -raw rails_sg_id)"                         >> $GITHUB_ENV
-          echo "API_SUB_DOMAIN=$(terraform output -raw api_sub_domain)"                   >> $GITHUB_ENV
-          echo "DOMAIN_NAME=$(terraform output -raw domain_name)"                         >> $GITHUB_ENV
-          echo "SERVICE_CLOUD_MAP_RAILS=$(terraform output -raw service_cloud_map_rails)" >> $GITHUB_ENV
-          echo "PRIVATE_DNS_ID=$(terraform output -raw private_dns_id)"                   >> $GITHUB_ENV
+          echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)"     >> $GITHUB_ENV
+          echo "DB_NAME=$(terraform output -raw db_name)"               >> $GITHUB_ENV
+          echo "DB_USERNAME=$(terraform output -raw db_username)"       >> $GITHUB_ENV
+          echo "RDS_SSM_NAME=$(terraform output -raw rds_ssm_name)"     >> $GITHUB_ENV
+          echo "STOR_BUCKET_ID=$(terraform output -raw stor_bucket_id)" >> $GITHUB_ENV
+          echo "ENV_BUCKET_ID=$(terraform output -raw env_bucket_id)"   >> $GITHUB_ENV
 
       - name: Get DB password from SSM
         id: dbpw
@@ -81,7 +67,7 @@ jobs:
             --query 'Parameter.Value' \
             --output text)
           echo "::add-mask::$PW"
-          echo "DB_PASSWORD=$PW" >> $GITHUB_OUTPUT
+          echo "DB_PASSWORD=$PW" >> $GITHUB_ENV
 
       - name: Build env file for container
         run: |
@@ -91,7 +77,7 @@ jobs:
           DB_NAME=$DB_NAME
           DB_USERNAME=$DB_USERNAME
           DB_PASSWORD=$DB_PASSWORD
-          AWS_REGION=${{ env.AWS_REGION }}
+          AWS_REGION=$AWS_REGION
           AWS_S3_BUCKET=$STOR_BUCKET_ID
           API_HOST=$API_SUB_DOMAIN.$DOMAIN_NAME
           API_PROTOCOL=https
