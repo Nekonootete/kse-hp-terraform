@@ -29,11 +29,8 @@ locals {
     RAILS_TASK_DEF          = module.task_rails.task_definition_arn
     NEXT_SERVICE_NAME       = module.service_next.service_name
     RAILS_SERVICE_NAME      = module.service_rails.service_name
+    NEXT_CONTAINER_NAME     = module.task_next.container_name
     RAILS_CONTAINER_NAME    = module.task_rails.container_name
-    RAILS_SUBNET_ID         = module.network.private_subnet_ids[0]
-    RAILS_SG_ID             = module.security.sg_rails_id
-    API_SUB_DOMAIN          = var.api_sub_domain
-    DOMAIN_NAME             = var.domain_name
     SERVICE_CLOUD_MAP_RAILS = var.service_cloud_map_rails
     PRIVATE_DNS_ID          = module.private_dns.private_dns_id
   }
