@@ -49,7 +49,6 @@ jobs:
         run: terraform apply -auto-approve tfplan
 
       - name: Get outputs
-        id: tf_outputs
         run: |
           echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)"     >> $GITHUB_ENV
           echo "DB_NAME=$(terraform output -raw db_name)"               >> $GITHUB_ENV
@@ -81,8 +80,6 @@ jobs:
           AWS_S3_BUCKET=$STOR_BUCKET_ID
           API_HOST=$API_SUB_DOMAIN.$DOMAIN_NAME
           API_PROTOCOL=https
-          INITIAL_USER_NAME=${{ secrets.INITIAL_USER_NAME  }}
-          INITIAL_USER_PASSWORD=${{ secrets.INITIAL_USER_PASSWORD }}
           RAILS_URL=http://$SERVICE_CLOUD_MAP_RAILS.$PRIVATE_DNS_ID:3001
           SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
           EOF
