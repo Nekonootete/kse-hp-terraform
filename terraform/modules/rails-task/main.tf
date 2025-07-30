@@ -4,7 +4,7 @@ resource "aws_secretsmanager_secret" "rails_master_key" {
 
 resource "aws_secretsmanager_secret_version" "rails_master_key" {
   secret_id     = aws_secretsmanager_secret.rails_master_key.id
-  secret_binary = filebase64("${path.module}/config/credentials/production.key")
+  secret_binary = filebase64("${path.root}/config/credentials/production.key")
 }
 
 resource "aws_ecs_task_definition" "this" {

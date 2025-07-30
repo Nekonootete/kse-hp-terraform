@@ -7,6 +7,10 @@ infra/*.tfstate.backup
 infra/*.tfplan
 infra/crash.log
 
+# 資格情報（**絶対に漏洩させない**）
+terraform/envs/stg/config/credential/production.yml.enc
+terraform/envs/stg/config/credential/production.key
+
 ###############################################################################
 #  共通ゴミ・一時ファイル
 ###############################################################################
