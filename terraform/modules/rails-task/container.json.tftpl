@@ -1,0 +1,24 @@
+[
+  {
+    "name": "${family}",
+    "image": "${image_uri}",
+    "essential": true,
+    "secrets": [
+      { "name": "RAILS_MASTER_KEY", "valueFrom": "${rails_master_key}" }
+    ],
+    "portMappings": [
+      { "containerPort": ${container_port}, "protocol": "tcp" }
+    ],
+    "environmentFiles": [
+      { "type": "s3", "value": "${env_bucket_arn}/${env_file_name}" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${awslogs-group}",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }
+]

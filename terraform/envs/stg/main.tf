@@ -170,12 +170,13 @@ module "task_next" {
 }
 
 module "task_rails" {
-  source             = "../../modules/task"
+  source             = "../../modules/rails-task"
   family             = "${var.project_name}-${var.environment}-rails"
   cpu                = "256"
   memory             = "512"
   image_uri          = "${module.ecr_rails.repository_url}:${var.image_tag}"
   container_port     = 3001
+  project_name       = var.project_name
   region             = var.region
   env_file_name      = var.env_file_name
   env_bucket_arn     = module.s3_env.bucket_arn
