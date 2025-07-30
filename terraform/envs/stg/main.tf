@@ -226,8 +226,8 @@ module "service_rails" {
 }
 
 module "ssm" {
-  source          = "../../modules/ssm"
-  project_name    = var.project_name
-  environment     = var.environment
-  app_params      = local.app_params
+  source       = "../../modules/ssm"
+  project_name = var.project_name
+  environment  = var.environment
+  app_params   = local.app_params
 }
