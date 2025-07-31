@@ -1,12 +1,3 @@
-resource "aws_secretsmanager_secret" "rails_master_key" {
-  name = "${ var.project_name }/rails/production-master-key"
-}
-
-resource "aws_secretsmanager_secret_version" "rails_master_key" {
-  secret_id     = aws_secretsmanager_secret.rails_master_key.id
-  secret_binary = filebase64("${path.root}/config/credentials/production.key")
-}
-
 resource "aws_ecs_task_definition" "this" {
   family                   = var.family
   requires_compatibilities = ["FARGATE"]
@@ -29,9 +20,9 @@ resource "aws_ecs_task_definition" "this" {
       container_port   = var.container_port
       env_file_name    = var.env_file_name
       env_bucket_arn   = var.env_bucket_arn
-      awslogs-group    = var.awslogs-group
+      awslogs_group    = var.awslogs_group
       region           = var.region
-      rails_master_key = aws_secretsmanager_secret.rails_master_key.arn
+      rails_master_key = var.rails_master_key
     }
   )
 }

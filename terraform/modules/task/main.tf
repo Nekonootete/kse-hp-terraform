@@ -20,7 +20,7 @@ resource "aws_ecs_task_definition" "this" {
       container_port = var.container_port
       env_file_name  = var.env_file_name
       env_bucket_arn = var.env_bucket_arn
-      awslogs-group  = var.awslogs-group
+      awslogs_group  = var.awslogs_group
       region         = var.region
     }
   )
