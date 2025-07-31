@@ -3,6 +3,9 @@
     "name": "${family}",
     "image": "${image_uri}",
     "essential": true,
+    "environment": [
+      { "name": "RAILS_ENV", "value": "production" }
+    ],
     "secrets": [
       { "name": "RAILS_MASTER_KEY", "valueFrom": "${rails_master_key}" }
     ],
@@ -15,7 +18,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "${awslogs-group}",
+        "awslogs-group": "${awslogs_group}",
         "awslogs-region": "${region}",
         "awslogs-stream-prefix": "ecs"
       }
