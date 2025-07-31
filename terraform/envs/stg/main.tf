@@ -161,6 +161,20 @@ module "awslogs_group_rails" {
   log_group_name = "/ecs/${var.project_name}-${var.environment}-rails"
 }
 
+resource "aws_lb_listener_rule" "rails" {
+  listener_arn = module.alb.alb_https_arn
+  priority     = 20
+  action {
+    type             = "forward"
+    target_group_arn = module.alb.target_group_arn_rails
+  }
+  condition {
+    host_header {
+      values = [ module.route53_stg_api.fqdn ]
+    }
+  }
+}
+
 module "task_next" {
   source             = "../../modules/task"
   family             = "${var.project_name}-${var.environment}-next"
