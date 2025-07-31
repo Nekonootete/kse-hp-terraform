@@ -78,14 +78,14 @@ module "rds" {
 }
 
 module "s3_stor" {
-  source          = "../../modules/s3-storage"
+  source          = "../../modules/s3_storage"
   environment     = var.environment
   project_name    = var.project_name
   vpc_endpoint_id = module.vpce.s3_vpc_endpoint_id
 }
 
 module "s3_env" {
-  source        = "../../modules/s3-env"
+  source        = "../../modules/s3_env"
   environment   = var.environment
   project_name  = var.project_name
   env_file_name = var.env_file_name
@@ -113,7 +113,7 @@ module "secrets" {
 }
 
 module "iam" {
-  source           = "../../modules/iam-task"
+  source           = "../../modules/iam_task"
   environment      = var.environment
   project_name     = var.project_name
   env_file_name    = var.env_file_name
@@ -191,7 +191,7 @@ module "task_next" {
 }
 
 module "task_rails" {
-  source             = "../../modules/rails-task"
+  source             = "../../modules/task_rails"
   family             = "${var.project_name}-${var.environment}-rails"
   cpu                = "256"
   memory             = "512"
