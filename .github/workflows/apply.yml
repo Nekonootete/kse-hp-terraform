@@ -55,10 +55,10 @@ jobs:
 
       - name: Get outputs
         run: |
-          keys=(rds_endpoint db_name db_username rds_ssm_name stor_bucket_id env_bucket_id)
+          keys=(rds_endpoint db_name db_username rds_ssm_name stor_bucket_id env_bucket_id api_fqdn service_cloud_map_rails private_dns_name)
           for key in "${keys[@]}"; do
             val="$(terraform output -raw "$key")"
-            # echo "::add-mask::$val"
+            echo "::add-mask::$val"
             name="$(echo "$key" | tr 'a-z' 'A-Z')"
             echo "${name}=$val" >> "$GITHUB_ENV"
           done
@@ -84,9 +84,9 @@ jobs:
           DB_PASSWORD=$DB_PASSWORD
           AWS_REGION=$AWS_REGION
           AWS_S3_BUCKET=$STOR_BUCKET_ID
-          API_HOST=$API_SUB_DOMAIN.$DOMAIN_NAME
+          API_HOST=$API_FQDN
           API_PROTOCOL=https
-          RAILS_URL=http://$SERVICE_CLOUD_MAP_RAILS.$PRIVATE_DNS_ID:3001
+          # RAILS_URL=http://$SERVICE_CLOUD_MAP_RAILS.$PRIVATE_DNS_NAME:3001
           SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
           EOF
 

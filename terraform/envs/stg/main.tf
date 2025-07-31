@@ -143,7 +143,7 @@ module "route53_stg" {
   alb_zone_id  = module.alb.alb_zone_id
 }
 
-module "route53_stg-api" {
+module "route53_stg_api" {
   source       = "../../modules/route53"
   name         = var.api_sub_domain
   zone_id      = data.terraform_remote_state.global.outputs.zone_id
