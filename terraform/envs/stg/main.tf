@@ -32,7 +32,7 @@ locals {
     NEXT_CONTAINER_NAME     = module.task_next.container_name
     RAILS_CONTAINER_NAME    = module.task_rails.container_name
     SERVICE_CLOUD_MAP_RAILS = var.service_cloud_map_rails
-    PRIVATE_DNS_ID          = module.private_dns.private_dns_id
+    PRIVATE_DNS_NAME        = module.private_dns.private_dns_name
   }
 }
 
