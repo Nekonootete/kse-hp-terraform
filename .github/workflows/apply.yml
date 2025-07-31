@@ -33,6 +33,11 @@ jobs:
           role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Create Rails master key file
+        run: |
+          mkdir -p kse-hp-terraform/terraform/envs/stg/config/credentials
+          echo "${{ secrets.PRODUCTION_KEY }}" > kse-hp-terraform/terraform/envs/stg/config/credentials/production.key
+
       - name: Terraform initialize
         run: terraform init
 
