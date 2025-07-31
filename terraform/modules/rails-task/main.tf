@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "rails_master_key" {
-  name = "${project_name}/rails/production-master-key"
+  name = "${ var.project_name }/rails/production-master-key"
 }
 
 resource "aws_secretsmanager_secret_version" "rails_master_key" {

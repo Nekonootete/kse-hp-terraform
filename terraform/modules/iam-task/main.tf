@@ -18,6 +18,14 @@ resource "aws_iam_role_policy_attachment" "exec_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+data "aws_iam_policy_document" "exec_secret_access" {
+  statement {
+    sid      = "AllowGetSecretValue"
+    actions  = ["secretsmanager:GetSecretValue"]
+    resources = [var.rails_master_key]
+  }
+}
+
 data "aws_iam_policy_document" "env_s3_read" {
   statement {
     sid       = "AllowEnvFileRead"
@@ -27,9 +35,19 @@ data "aws_iam_policy_document" "env_s3_read" {
   }
 }
 
+resource "aws_iam_policy" "exec_secret_policy" {
+  name   = "exec-secret-${var.project_name}-${var.environment}"
+  policy = data.aws_iam_policy_document.exec_secret_access.json
+}
+
 resource "aws_iam_policy" "env_s3_read" {
   name   = "env-s3-read-${var.project_name}-${var.environment}"
   policy = data.aws_iam_policy_document.env_s3_read.json
+}
+
+resource "aws_iam_role_policy_attachment" "exec_secret_attach" {
+  role       = aws_iam_role.exec.name
+  policy_arn = aws_iam_policy.exec_secret_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "exec_env_attach" {

@@ -64,6 +64,7 @@ module "vpce" {
   private_route_table_ids = [module.network.private_route_table_id]
   sg_ecr_vpce_ids         = [module.security.sg_ecr_vpce_id]
   sg_cwlogs_vpce_ids      = [module.security.sg_cwlogs_vpce_id]
+  sg_sm_vpce_ids          = [module.security.sg_sm_vpce_id]
 }
 
 module "rds" {
@@ -106,14 +107,20 @@ module "cluster" {
   project_name = var.project_name
 }
 
+module "secrets" {
+  source       = "../../modules/secrets"
+  project_name = var.project_name
+}
+
 module "iam" {
-  source          = "../../modules/iam-task"
-  environment     = var.environment
-  project_name    = var.project_name
-  env_file_name   = var.env_file_name
-  env_bucket_id   = module.s3_env.bucket_id
-  env_bucket_arn  = module.s3_env.bucket_arn
-  stor_bucket_arn = module.s3_stor.bucket_arn
+  source           = "../../modules/iam-task"
+  environment      = var.environment
+  project_name     = var.project_name
+  env_file_name    = var.env_file_name
+  env_bucket_id    = module.s3_env.bucket_id
+  env_bucket_arn   = module.s3_env.bucket_arn
+  stor_bucket_arn  = module.s3_stor.bucket_arn
+  rails_master_key = module.secrets.rails_master_key
 }
 
 module "alb" {
@@ -144,12 +151,12 @@ module "route53_stg-api" {
   alb_zone_id  = module.alb.alb_zone_id
 }
 
-module "awslogs-group-next" {
+module "awslogs_group_next" {
   source         = "../../modules/awslogs"
   log_group_name = "/ecs/${var.project_name}-${var.environment}-next"
 }
 
-module "awslogs-group-rails" {
+module "awslogs_group_rails" {
   source         = "../../modules/awslogs"
   log_group_name = "/ecs/${var.project_name}-${var.environment}-rails"
 }
@@ -166,7 +173,7 @@ module "task_next" {
   env_bucket_arn     = module.s3_env.bucket_arn
   execution_role_arn = module.iam.execution_role_arn
   task_role_arn      = module.iam.task_role_arn
-  awslogs-group      = module.awslogs-group-next.awslogs-group
+  awslogs_group      = module.awslogs_group_next.awslogs_group
 }
 
 module "task_rails" {
@@ -182,7 +189,8 @@ module "task_rails" {
   env_bucket_arn     = module.s3_env.bucket_arn
   execution_role_arn = module.iam.execution_role_arn
   task_role_arn      = module.iam.task_role_arn
-  awslogs-group      = module.awslogs-group-rails.awslogs-group
+  awslogs_group      = module.awslogs_group_rails.awslogs_group
+  rails_master_key   = module.secrets.rails_master_key
 }
 
 module "private_dns" {

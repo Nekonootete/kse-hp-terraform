@@ -6,3 +6,4 @@ variable "private_subnet_ids"      { type = list(string) }
 variable "private_route_table_ids" { type = list(string) }
 variable "sg_ecr_vpce_ids"         { type = list(string) }
 variable "sg_cwlogs_vpce_ids"      { type = list(string) }
+variable "sg_sm_vpce_ids"          { type = list(string) }

@@ -36,14 +36,27 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
 }
 
 resource "aws_vpc_endpoint" "cwlogs" {
-  vpc_id             = var.vpc_id
-  service_name       = "com.amazonaws.${var.region}.logs"
-  vpc_endpoint_type  = "Interface"
-  subnet_ids         = var.private_subnet_ids
-  security_group_ids = var.sg_cwlogs_vpce_ids
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${var.region}.logs"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = var.private_subnet_ids
+  security_group_ids  = var.sg_cwlogs_vpce_ids
   private_dns_enabled = true
 
   tags = {
     Name = "cwlogs-${var.project_name}-${var.environment}"
+  }
+}
+
+resource "aws_vpc_endpoint" "secretsmanager" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${var.region}.secretsmanager"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = var.private_subnet_ids
+  security_group_ids  = var.sg_sm_vpce_ids
+  private_dns_enabled = true
+
+  tags = {
+    Name = "sm-${var.project_name}-${var.environment}"
   }
 }

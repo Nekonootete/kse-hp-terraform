@@ -1,0 +1,1 @@
+output "rails_master_key" { value = aws_secretsmanager_secret.rails_master_key.arn }
