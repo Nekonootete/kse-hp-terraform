@@ -58,7 +58,7 @@ jobs:
           keys=(rds_endpoint db_name db_username rds_ssm_name stor_bucket_id env_bucket_id)
           for key in "${keys[@]}"; do
             val="$(terraform output -raw "$key")"
-            echo "::add-mask::$val"
+            # echo "::add-mask::$val"
             name="$(echo "$key" | tr 'a-z' 'A-Z')"
             echo "${name}=$val" >> "$GITHUB_ENV"
           done
