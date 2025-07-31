@@ -170,7 +170,7 @@ resource "aws_lb_listener_rule" "rails" {
   }
   condition {
     host_header {
-      values = [ module.route53_stg_api.fqdn ]
+      values = [module.route53_stg_api.fqdn]
     }
   }
 }
