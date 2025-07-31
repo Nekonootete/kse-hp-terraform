@@ -26,7 +26,7 @@ jobs:
       - name: Create Rails master key file
         run: |
           mkdir -p config/credentials
-          echo "${{ secrets.PRODUCTION_KEY }}" > config/credentials/production.key
+          echo -n "${{ secrets.PRODUCTION_KEY }}" > config/credentials/production.key
 
       - uses: hashicorp/setup-terraform@v3
         with:
