@@ -248,7 +248,6 @@ module "private_dns" {
 
 module "next_first_service" {
   source              = "../../modules/service"
-  number              = "1"
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.next_service_cloud_map
@@ -265,7 +264,6 @@ module "next_first_service" {
 
 module "next_second_service" {
   source              = "../../modules/service"
-  number              = "2"
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.next_service_cloud_map
@@ -282,7 +280,6 @@ module "next_second_service" {
 
 module "rails_first_service" {
   source              = "../../modules/service"
-  number              = "1"
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.rails_service_cloud_map
@@ -299,7 +296,6 @@ module "rails_first_service" {
 
 module "rails_second_service" {
   source              = "../../modules/service"
-  number              = "2"
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.rails_service_cloud_map
