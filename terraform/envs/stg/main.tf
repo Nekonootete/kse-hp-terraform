@@ -22,19 +22,19 @@ data "terraform_remote_state" "global" {
 
 locals {
   app_params = {
-    NEXT_ECR_URL              = module.next_ecr.repository_url
-    RAILS_ECR_URL             = module.rails_ecr.repository_url
-    CLUSTER_NAME              = module.cluster.name
-    NEXT_TASK_DEF             = module.next_task.task_definition_arn
-    RAILS_TASK_DEF            = module.rails_task.task_definition_arn
-    NEXT_SERVICE_NAME         = module.next_service.name
-    NEXT_SERVICE_NAME         = module.next_service.name
-    RAILS_SERVICE_NAME        = module.rails_service.name
-    RAILS_SERVICE_NAME        = module.rails_service.name
-    NEXT_CONTAINER_NAME       = module.next_task.container_name
-    RAILS_CONTAINER_NAME      = module.rails_task.container_name
-    RAILS_SERVICE_CLOUD_MAP   = var.rails_service_cloud_map
-    PRIVATE_DNS_NAME          = module.private_dns.name
+    NEXT_ECR_URL            = module.next_ecr.repository_url
+    RAILS_ECR_URL           = module.rails_ecr.repository_url
+    CLUSTER_NAME            = module.cluster.name
+    NEXT_TASK_DEF           = module.next_task.task_definition_arn
+    RAILS_TASK_DEF          = module.rails_task.task_definition_arn
+    NEXT_SERVICE_NAME       = module.next_service.name
+    NEXT_SERVICE_NAME       = module.next_service.name
+    RAILS_SERVICE_NAME      = module.rails_service.name
+    RAILS_SERVICE_NAME      = module.rails_service.name
+    NEXT_CONTAINER_NAME     = module.next_task.container_name
+    RAILS_CONTAINER_NAME    = module.rails_task.container_name
+    RAILS_SERVICE_CLOUD_MAP = var.rails_service_cloud_map
+    PRIVATE_DNS_NAME        = module.private_dns.name
   }
 }
 
