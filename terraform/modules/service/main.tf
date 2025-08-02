@@ -18,7 +18,7 @@ resource "aws_service_discovery_service" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "svc-${var.container_name}"
+  name            = "svc-${var.container_name}-${var.number}"
   cluster         = var.cluster_id
   task_definition = var.task_definition_arn
   launch_type     = "FARGATE"
