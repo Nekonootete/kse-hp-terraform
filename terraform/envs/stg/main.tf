@@ -77,16 +77,16 @@ module "vpce" {
 }
 
 module "alb" {
-  source                = "../../modules/alb"
-  environment           = var.environment
-  project_name          = var.project_name
-  port_next             = var.app_ports[0]
-  port_rails            = var.app_ports[1]
-  cdn_fqdn              = var.cdn_fqdn
-  vpc_id                = module.network.vpc_id
-  public_subnet_ids     = module.network.public_subnet_ids
-  alb_sg_id             = module.security.alb_sg_id
-  acm_cert_arn          = data.terraform_remote_state.global.outputs.acm_certificate_arn
+  source            = "../../modules/alb"
+  environment       = var.environment
+  project_name      = var.project_name
+  port_next         = var.app_ports[0]
+  port_rails        = var.app_ports[1]
+  cdn_fqdn          = var.cdn_fqdn
+  vpc_id            = module.network.vpc_id
+  public_subnet_ids = module.network.public_subnet_ids
+  alb_sg_id         = module.security.alb_sg_id
+  acm_cert_arn      = data.terraform_remote_state.global.outputs.acm_certificate_arn
 }
 
 module "stg_route53" {
@@ -139,15 +139,15 @@ module "env_bucket" {
 }
 
 module "cloudfront" {
-  source                           = "../../modules/cloudfront"
-  environment                      = var.environment
-  project_name                     = var.project_name
-  domain_name                      = var.domain_name
-  fqdn                             = var.fqdn
-  cdn_fqdn                         = var.cdn_fqdn
-  alb_dns_name                     = module.alb.dns_name
-  app_bucket_domain_name           = module.app_bucket.bucket_domain_name
-  app_bucket_regional_domain_name  = module.app_bucket.bucket_regional_domain_name
+  source                          = "../../modules/cloudfront"
+  environment                     = var.environment
+  project_name                    = var.project_name
+  domain_name                     = var.domain_name
+  fqdn                            = var.fqdn
+  cdn_fqdn                        = var.cdn_fqdn
+  alb_dns_name                    = module.alb.dns_name
+  app_bucket_domain_name          = module.app_bucket.bucket_domain_name
+  app_bucket_regional_domain_name = module.app_bucket.bucket_regional_domain_name
 }
 
 module "app_bucket_policy" {
@@ -199,28 +199,28 @@ module "env_bucket_policy" {
 }
 
 module "next_log_group" {
-  source         = "../../modules/cloudwatch"
-  name = "/ecs/${var.project_name}-${var.environment}-next"
+  source = "../../modules/cloudwatch"
+  name   = "/ecs/${var.project_name}-${var.environment}-next"
 }
 
 module "rails_log_group" {
-  source         = "../../modules/cloudwatch"
-  name = "/ecs/${var.project_name}-${var.environment}-rails"
+  source = "../../modules/cloudwatch"
+  name   = "/ecs/${var.project_name}-${var.environment}-rails"
 }
 
 module "next_task" {
-  source             = "../../modules/task"
-  family             = "${var.project_name}-${var.environment}-next"
-  cpu                = "512"
-  memory             = "1024"
-  image_uri          = "${module.next_ecr.repository_url}:${var.image_tag}"
-  container_port     = 3000
-  region             = var.region
-  env_file_name      = var.env_file_name
-  env_bucket_arn     = module.env_bucket.arn
-  exec_role_arn      = module.task_iam.exec_role_arn
-  task_role_arn      = module.task_iam.task_role_arn
-  log_group_name     = module.next_log_group.name
+  source         = "../../modules/task"
+  family         = "${var.project_name}-${var.environment}-next"
+  cpu            = "512"
+  memory         = "1024"
+  image_uri      = "${module.next_ecr.repository_url}:${var.image_tag}"
+  container_port = 3000
+  region         = var.region
+  env_file_name  = var.env_file_name
+  env_bucket_arn = module.env_bucket.arn
+  exec_role_arn  = module.task_iam.exec_role_arn
+  task_role_arn  = module.task_iam.task_role_arn
+  log_group_name = module.next_log_group.name
 }
 
 module "rails_task" {
@@ -241,9 +241,9 @@ module "rails_task" {
 }
 
 module "private_dns" {
-  source            = "../../modules/private_dns"
-  vpc_id            = module.network.vpc_id
-  fqdn              = "pri.${var.domain_name}"
+  source = "../../modules/private_dns"
+  vpc_id = module.network.vpc_id
+  fqdn   = "pri.${var.domain_name}"
 }
 
 module "next_first_service" {
