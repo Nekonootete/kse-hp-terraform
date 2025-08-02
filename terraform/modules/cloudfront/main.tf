@@ -74,15 +74,6 @@ resource "aws_cloudfront_distribution" "cdn" {
     }
   }
 
-  default_cache_behavior {
-    target_origin_id         = "alb-${var.project_name}-${var.environment}"
-    viewer_protocol_policy   = "redirect-to-https"
-    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
-    cached_methods           = ["GET", "HEAD"]
-    origin_request_policy_id = aws_cloudfront_origin_request_policy.all_viewer.id
-    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
-  }
-
   ordered_cache_behavior {
     path_pattern             = "/_next/static/*"
     target_origin_id         = "alb-${var.project_name}-${var.environment}"
@@ -104,6 +95,15 @@ resource "aws_cloudfront_distribution" "cdn" {
   cache_policy_id          = "b2884449-e4de-46a7-ac36-70bc7f1ddd6d"
   compress                 = true
 }
+
+  default_cache_behavior {
+    target_origin_id         = "alb-${var.project_name}-${var.environment}"
+    viewer_protocol_policy   = "redirect-to-https"
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods           = ["GET", "HEAD"]
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.all_viewer.id
+    cache_policy_id          = aws_cloudfront_cache_policy.caching_disabled.id
+  }
 
   restrictions {
     geo_restriction {
