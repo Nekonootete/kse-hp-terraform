@@ -6,7 +6,7 @@ resource "aws_service_discovery_service" "this" {
 
     dns_records {
       type = "A"
-      ttl  = 10
+      ttl  = 60
     }
 
     routing_policy = "MULTIVALUE"
@@ -40,5 +40,10 @@ resource "aws_ecs_service" "this" {
 
   service_registries {
     registry_arn = aws_service_discovery_service.this.arn
+  }
+
+  ordered_placement_strategy {
+    type  = "spread"
+    field = "attribute:ecs.availability-zone"
   }
 }

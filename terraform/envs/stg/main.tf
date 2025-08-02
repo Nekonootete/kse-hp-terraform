@@ -259,7 +259,7 @@ module "next_service" {
   container_name      = module.next_task.container_name
   container_port      = var.app_ports[0]
   private_dns_id      = module.private_dns.id
-  desired_count       = 1
+  desired_count       = 2
 }
 
 module "rails_service" {
@@ -275,5 +275,5 @@ module "rails_service" {
   container_name      = module.rails_task.container_name
   container_port      = var.app_ports[1]
   private_dns_id      = module.private_dns.id
-  desired_count       = 1
+  desired_count       = 2
 }
