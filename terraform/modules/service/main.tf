@@ -18,11 +18,12 @@ resource "aws_service_discovery_service" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "svc-${var.container_name}"
-  cluster         = var.cluster_id
-  task_definition = var.task_definition_arn
-  launch_type     = "FARGATE"
-  desired_count   = var.desired_count
+  name                    = "svc-${var.container_name}"
+  cluster                 = var.cluster_id
+  task_definition         = var.task_definition_arn
+  launch_type             = "FARGATE"
+  desired_count           = var.desired_count
+  enable_execute_command  = true
 
   network_configuration {
     subnets         = var.subnet_ids
