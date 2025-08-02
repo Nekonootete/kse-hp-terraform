@@ -27,10 +27,10 @@ locals {
     CLUSTER_NAME              = module.cluster.name
     NEXT_TASK_DEF             = module.next_task.task_definition_arn
     RAILS_TASK_DEF            = module.rails_task.task_definition_arn
-    NEXT_FIRST_SERVICE_NAME   = module.next_first_service.name
-    NEXT_SECOND_SERVICE_NAME  = module.next_second_service.name
-    RAILS_FIRST_SERVICE_NAME  = module.rails_first_service.name
-    RAILS_SECOND_SERVICE_NAME = module.rails_second_service.name
+    NEXT_SERVICE_NAME         = module.next_service.name
+    NEXT_SERVICE_NAME         = module.next_service.name
+    RAILS_SERVICE_NAME        = module.rails_service.name
+    RAILS_SERVICE_NAME        = module.rails_service.name
     NEXT_CONTAINER_NAME       = module.next_task.container_name
     RAILS_CONTAINER_NAME      = module.rails_task.container_name
     RAILS_SERVICE_CLOUD_MAP   = var.rails_service_cloud_map
@@ -246,12 +246,12 @@ module "private_dns" {
   fqdn   = "pri.${var.domain_name}"
 }
 
-module "next_first_service" {
+module "next_service" {
   source              = "../../modules/service"
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.next_service_cloud_map
-  subnet_ids          = [module.network.private_subnet_ids[0]]
+  subnet_ids          = module.network.private_subnet_ids
   sg_id               = module.security.next_sg_id
   cluster_id          = module.cluster.id
   target_group_arn    = module.alb.next_target_group_arn
@@ -262,44 +262,12 @@ module "next_first_service" {
   desired_count       = 1
 }
 
-module "next_second_service" {
-  source              = "../../modules/service"
-  environment         = var.environment
-  project_name        = var.project_name
-  service_cloud_map   = var.next_service_cloud_map
-  subnet_ids          = [module.network.private_subnet_ids[1]]
-  sg_id               = module.security.next_sg_id
-  cluster_id          = module.cluster.id
-  target_group_arn    = module.alb.next_target_group_arn
-  task_definition_arn = module.next_task.task_definition_arn
-  container_name      = module.next_task.container_name
-  container_port      = var.app_ports[0]
-  private_dns_id      = module.private_dns.id
-  desired_count       = 1
-}
-
-module "rails_first_service" {
+module "rails_service" {
   source              = "../../modules/service"
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.rails_service_cloud_map
-  subnet_ids          = [module.network.private_subnet_ids[0]]
-  sg_id               = module.security.rails_sg_id
-  cluster_id          = module.cluster.id
-  target_group_arn    = module.alb.rails_target_group_arn
-  task_definition_arn = module.rails_task.task_definition_arn
-  container_name      = module.rails_task.container_name
-  container_port      = var.app_ports[1]
-  private_dns_id      = module.private_dns.id
-  desired_count       = 1
-}
-
-module "rails_second_service" {
-  source              = "../../modules/service"
-  environment         = var.environment
-  project_name        = var.project_name
-  service_cloud_map   = var.rails_service_cloud_map
-  subnet_ids          = [module.network.private_subnet_ids[1]]
+  subnet_ids          = module.network.private_subnet_ids
   sg_id               = module.security.rails_sg_id
   cluster_id          = module.cluster.id
   target_group_arn    = module.alb.rails_target_group_arn
