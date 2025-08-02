@@ -3,7 +3,7 @@ data "aws_iam_policy_document" "vpce_read" {
     sid        = "AllowVPCEndpointAccess"
     effect     = "Allow"
     actions    = ["s3:GetObject","s3:ListBucket"]
-    resources  = [var.app_bucket.arn, "${var.app_bucket.arn}/*"]
+    resources  = [var.app_bucket_arn, "${var.app_bucket_arn}/*"]
 
     principals {
       type = "*"

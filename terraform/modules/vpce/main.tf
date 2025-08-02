@@ -14,7 +14,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
   service_name        = "com.amazonaws.ap-northeast-1.ecr.api"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = var.private_subnet_ids
-  security_group_ids  = var.sg_ecr_vpce_ids
+  security_group_ids  = var.ecr_vpce_sg_ids
   private_dns_enabled = true
 
   tags = {
@@ -27,7 +27,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   service_name        = "com.amazonaws.ap-northeast-1.ecr.dkr"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = var.private_subnet_ids
-  security_group_ids  = var.sg_ecr_vpce_ids
+  security_group_ids  = var.ecr_vpce_sg_ids
   private_dns_enabled = true
 
   tags = {
@@ -40,7 +40,7 @@ resource "aws_vpc_endpoint" "cwlogs" {
   service_name        = "com.amazonaws.${var.region}.logs"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = var.private_subnet_ids
-  security_group_ids  = var.sg_cwlogs_vpce_ids
+  security_group_ids  = var.cwlogs_vpce_sg_ids
   private_dns_enabled = true
 
   tags = {
@@ -53,7 +53,7 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   service_name        = "com.amazonaws.${var.region}.secretsmanager"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = var.private_subnet_ids
-  security_group_ids  = var.sg_sm_vpce_ids
+  security_group_ids  = var.sm_vpce_sg_ids
   private_dns_enabled = true
 
   tags = {

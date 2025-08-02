@@ -7,7 +7,7 @@ data "aws_iam_policy_document" "env_file_read" {
 
     principals {
       type        = "AWS"
-      identifiers = [aws_iam_role.exec.arn]
+      identifiers = [var.exec_role_arn]
     }
   }
 }

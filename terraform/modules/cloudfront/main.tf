@@ -35,9 +35,9 @@ resource "aws_cloudfront_cache_policy" "caching_disabled" {
   max_ttl     = 0
 
   parameters_in_cache_key_and_forwarded_to_origin {
-    headers_config  { header_behavior  = "allViewer" }
-    cookies_config  { cookie_behavior  = "all"       }
-    query_strings_config { query_string_behavior = "all" }
+    headers_config  { header_behavior  = "none" }
+    cookies_config  { cookie_behavior  = "none" }
+    query_strings_config { query_string_behavior = "none" }
   }
 }
 

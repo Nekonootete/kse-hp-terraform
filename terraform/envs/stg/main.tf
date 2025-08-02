@@ -24,7 +24,7 @@ locals {
   app_params = {
     NEXT_ECR_URL              = module.next_ecr.repository_url
     RAILS_ECR_URL             = module.rails_ecr.repository_url
-    CLUSTER_NAME              = module.cluster.cluster_name
+    CLUSTER_NAME              = module.cluster.name
     NEXT_TASK_DEF             = module.next_task.task_definition_arn
     RAILS_TASK_DEF            = module.rails_task.task_definition_arn
     NEXT_FIRST_SERVICE_NAME   = module.next_first_service.name
@@ -71,9 +71,9 @@ module "vpce" {
   vpc_id                  = module.network.vpc_id
   private_subnet_ids      = module.network.private_subnet_ids
   private_route_table_ids = [module.network.private_route_table_id]
-  sg_ecr_vpce_ids         = [module.security.sg_ecr_vpce_id]
-  sg_cwlogs_vpce_ids      = [module.security.sg_cwlogs_vpce_id]
-  sg_sm_vpce_ids          = [module.security.sg_sm_vpce_id]
+  ecr_vpce_sg_ids         = [module.security.ecr_vpce_sg_id]
+  cwlogs_vpce_sg_ids      = [module.security.cwlogs_vpce_sg_id]
+  sm_vpce_sg_ids          = [module.security.sm_vpce_sg_id]
 }
 
 module "alb" {
@@ -85,7 +85,7 @@ module "alb" {
   cdn_fqdn              = var.cdn_fqdn
   vpc_id                = module.network.vpc_id
   public_subnet_ids     = module.network.public_subnet_ids
-  alb_security_group_id = module.security.sg_alb_id
+  alb_sg_id             = module.security.alb_sg_id
   acm_cert_arn          = data.terraform_remote_state.global.outputs.acm_certificate_arn
 }
 
@@ -93,16 +93,16 @@ module "stg_route53" {
   source       = "../../modules/route53"
   fqdn         = var.fqdn
   zone_id      = data.terraform_remote_state.global.outputs.zone_id
-  alb_dns_name = module.alb.alb_dns_name
-  alb_zone_id  = module.alb.alb_zone_id
+  alb_dns_name = module.alb.dns_name
+  alb_zone_id  = module.alb.zone_id
 }
 
 module "stg_cdn_route53" {
   source       = "../../modules/route53"
   fqdn         = var.cdn_fqdn
   zone_id      = data.terraform_remote_state.global.outputs.zone_id
-  alb_dns_name = module.alb.alb_dns_name
-  alb_zone_id  = module.alb.alb_zone_id
+  alb_dns_name = module.alb.dns_name
+  alb_zone_id  = module.alb.zone_id
 }
 
 module "db_password" {
@@ -128,7 +128,7 @@ module "app_bucket" {
   source          = "../../modules/app_s3"
   environment     = var.environment
   project_name    = var.project_name
-  vpc_endpoint_id = module.vpce.s3_vpc_endpoint_id
+  vpc_endpoint_id = module.vpce.s3_vpce_id
 }
 
 module "env_bucket" {
@@ -191,10 +191,11 @@ module "task_iam" {
 }
 
 module "env_bucket_policy" {
-  source        = "../../modules/env_s3_policy"
-  env_file_name = var.env_file_name
-  env_bucket_id = module.env_bucket.id
+  source         = "../../modules/env_s3_policy"
+  env_file_name  = var.env_file_name
+  env_bucket_id  = module.env_bucket.id
   env_bucket_arn = module.env_bucket.arn
+  exec_role_arn  = module.task_iam.exec_role_arn
 }
 
 module "next_log_group" {
@@ -257,7 +258,7 @@ module "next_first_service" {
   task_definition_arn = module.next_task.task_definition_arn
   container_name      = module.next_task.container_name
   container_port      = var.app_ports[0]
-  private_dns_id      = module.private_dns.private_dns_id
+  private_dns_id      = module.private_dns.id
   desired_count       = 1
 }
 
@@ -273,7 +274,7 @@ module "next_second_service" {
   task_definition_arn = module.next_task.task_definition_arn
   container_name      = module.next_task.container_name
   container_port      = var.app_ports[0]
-  private_dns_id      = module.private_dns.private_dns_id
+  private_dns_id      = module.private_dns.id
   desired_count       = 1
 }
 
@@ -289,7 +290,7 @@ module "rails_first_service" {
   task_definition_arn = module.rails_task.task_definition_arn
   container_name      = module.rails_task.container_name
   container_port      = var.app_ports[1]
-  private_dns_id      = module.private_dns.private_dns_id
+  private_dns_id      = module.private_dns.id
   desired_count       = 1
 }
 
@@ -305,6 +306,6 @@ module "rails_second_service" {
   task_definition_arn = module.rails_task.task_definition_arn
   container_name      = module.rails_task.container_name
   container_port      = var.app_ports[1]
-  private_dns_id      = module.private_dns.private_dns_id
+  private_dns_id      = module.private_dns.id
   desired_count       = 1
 }
