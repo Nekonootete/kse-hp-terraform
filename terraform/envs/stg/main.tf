@@ -22,17 +22,19 @@ data "terraform_remote_state" "global" {
 
 locals {
   app_params = {
-    NEXT_ECR_URL            = module.next_ecr.repository_url
-    RAILS_ECR_URL           = module.rails_ecr.repository_url
-    CLUSTER_NAME            = module.cluster.cluster_name
-    NEXT_TASK_DEF           = module.next_task.task_definition_arn
-    RAILS_TASK_DEF          = module.rails_task.task_definition_arn
-    NEXT_SERVICE_NAME       = module.next_service.name
-    RAILS_SERVICE_NAME      = module.rails_service.name
-    NEXT_CONTAINER_NAME     = module.next_task.container_name
-    RAILS_CONTAINER_NAME    = module.rails_task.container_name
-    RAILS_SERVICE_CLOUD_MAP = var.rails_service_cloud_map
-    PRIVATE_DNS_NAME        = module.private_dns.name
+    NEXT_ECR_URL              = module.next_ecr.repository_url
+    RAILS_ECR_URL             = module.rails_ecr.repository_url
+    CLUSTER_NAME              = module.cluster.cluster_name
+    NEXT_TASK_DEF             = module.next_task.task_definition_arn
+    RAILS_TASK_DEF            = module.rails_task.task_definition_arn
+    NEXT_FIRST_SERVICE_NAME   = module.next_first_service.name
+    NEXT_SECOND_SERVICE_NAME  = module.next_second_service.name
+    RAILS_FIRST_SERVICE_NAME  = module.rails_first_service.name
+    RAILS_SECOND_SERVICE_NAME = module.rails_second_service.name
+    NEXT_CONTAINER_NAME       = module.next_task.container_name
+    RAILS_CONTAINER_NAME      = module.rails_task.container_name
+    RAILS_SERVICE_CLOUD_MAP   = var.rails_service_cloud_map
+    PRIVATE_DNS_NAME          = module.private_dns.name
   }
 }
 
@@ -80,7 +82,7 @@ module "alb" {
   project_name          = var.project_name
   port_next             = var.app_ports[0]
   port_rails            = var.app_ports[1]
-  api_fqdn              = var.api_fqdn
+  cdn_fqdn              = var.cdn_fqdn
   vpc_id                = module.network.vpc_id
   public_subnet_ids     = module.network.public_subnet_ids
   alb_security_group_id = module.security.sg_alb_id
@@ -95,9 +97,9 @@ module "stg_route53" {
   alb_zone_id  = module.alb.alb_zone_id
 }
 
-module "stg_api_route53" {
+module "stg_cdn_route53" {
   source       = "../../modules/route53"
-  fqdn         = var.api_fqdn
+  fqdn         = var.cdn_fqdn
   zone_id      = data.terraform_remote_state.global.outputs.zone_id
   alb_dns_name = module.alb.alb_dns_name
   alb_zone_id  = module.alb.alb_zone_id
@@ -142,7 +144,7 @@ module "cloudfront" {
   project_name                     = var.project_name
   domain_name                      = var.domain_name
   fqdn                             = var.fqdn
-  api_fqdn                         = var.api_fqdn
+  cdn_fqdn                         = var.cdn_fqdn
   alb_dns_name                     = module.alb.dns_name
   app_bucket_domain_name           = module.app_bucket.bucket_domain_name
   app_bucket_regional_domain_name  = module.app_bucket.bucket_regional_domain_name

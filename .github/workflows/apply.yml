@@ -55,7 +55,7 @@ jobs:
 
       - name: Get outputs
         run: |
-          keys=(db_address db_name db_username db_password_name app_bucket_id env_bucket_id api_fqdn rails_service_cloud_map private_dns_name)
+          keys=(db_address db_name db_username db_password_name app_bucket_id env_bucket_id cdn_fqdn rails_service_cloud_map private_dns_name)
           for key in "${keys[@]}"; do
             val="$(terraform output -raw "$key")"
             echo "::add-mask::$val"
@@ -84,8 +84,9 @@ jobs:
           DB_PASSWORD=$DB_PASSWORD
           AWS_REGION=$AWS_REGION
           AWS_S3_BUCKET=$APP_BUCKET_ID
-          API_HOST=$API_FQDN
-          API_PROTOCOL=https
+          CDN_HOST=$CDN_FQDN
+          CDN_PROTOCOL=https
+          CDN_HOST=$CDN_FQDN
           RAILS_URL=http://$RAILS_SERVICE_CLOUD_MAP.$PRIVATE_DNS_NAME:3001
           SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
           EOF

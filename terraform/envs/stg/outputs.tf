@@ -5,6 +5,6 @@ output "db_username" { value = var.db_username }
 output "db_password_name" { value = module.db_password.name }
 output "app_bucket_id" { value = module.app_bucket.id }
 output "env_bucket_id" { value = module.env_bucket.id }
-output "api_fqdn" { value = var.api_fqdn }
+output "cdn_fqdn" { value = var.cdn_fqdn }
 output "rails_service_cloud_map" { value = var.rails_service_cloud_map }
 output "private_dns_name" { value = module.private_dns.name }
