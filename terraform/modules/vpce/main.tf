@@ -16,7 +16,7 @@ resource "aws_vpc_endpoint" "ecr_api" {
   subnet_ids          = var.private_subnet_ids
   security_group_ids  = var.sg_ecr_vpce_ids
   private_dns_enabled = true
-  
+
   tags = {
     Name = "ecr_api-${var.project_name}-${var.environment}"
   }
@@ -29,7 +29,7 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   subnet_ids          = var.private_subnet_ids
   security_group_ids  = var.sg_ecr_vpce_ids
   private_dns_enabled = true
-  
+
   tags = {
     Name = "ecr_dkr-${var.project_name}-${var.environment}"
   }

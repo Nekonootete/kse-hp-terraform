@@ -4,7 +4,7 @@ resource "aws_ecs_task_definition" "this" {
   network_mode             = "awsvpc"
   cpu                      = var.cpu
   memory                   = var.memory
-  execution_role_arn       = var.execution_role_arn
+  execution_role_arn       = var.exec_role_arn
   task_role_arn            = var.task_role_arn
 
   runtime_platform {
@@ -15,14 +15,14 @@ resource "aws_ecs_task_definition" "this" {
   container_definitions = templatefile(
     "${path.module}/container.json.tftpl",
     {
-      family           = var.family
-      image_uri        = var.image_uri
-      container_port   = var.container_port
-      env_file_name    = var.env_file_name
-      env_bucket_arn   = var.env_bucket_arn
-      awslogs_group    = var.awslogs_group
-      region           = var.region
-      rails_master_key = var.rails_master_key
+      family               = var.family
+      image_uri            = var.image_uri
+      container_port       = var.container_port
+      env_file_name        = var.env_file_name
+      env_bucket_arn       = var.env_bucket_arn
+      log_group_name       = var.log_group_name
+      region               = var.region
+      rails_master_key_arn = var.rails_master_key_arn
     }
   )
 }

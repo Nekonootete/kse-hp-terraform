@@ -1,4 +1,4 @@
-resource "aws_vpc" "this" {
+resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -13,7 +13,7 @@ resource "aws_subnet" "public" {
     for idx, cidr in var.public_subnet_cidrs :
     idx => { cidr = cidr, az = element(var.public_subnet_azs, idx) }
   }
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = each.value.cidr
   availability_zone       = each.value.az
   map_public_ip_on_launch = false
@@ -28,7 +28,7 @@ resource "aws_subnet" "private" {
     for idx, cidr in var.private_subnet_cidrs :
     idx => { cidr = cidr, az = element(var.private_subnet_azs, idx) }
   }
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = each.value.cidr
   availability_zone       = each.value.az
   map_public_ip_on_launch = false
@@ -40,7 +40,7 @@ resource "aws_subnet" "private" {
 
 
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
 
   tags = {
     Name = "rt-public-${var.project_name}-${var.environment}"
@@ -53,18 +53,18 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc.id
 }
 
 resource "aws_route" "public" {
   route_table_id         = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.this.id
+  gateway_id             = aws_internet_gateway.igw.id
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
 
   tags = {
     Name = "rt-private-${var.project_name}-${var.environment}"

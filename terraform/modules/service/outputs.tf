@@ -1,1 +1,1 @@
-output "service_name" { value = aws_ecs_service.this.name }
+output "name" { value = aws_ecs_service.this.name }

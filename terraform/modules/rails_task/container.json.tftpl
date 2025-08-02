@@ -7,7 +7,7 @@
       { "name": "RAILS_ENV", "value": "production" }
     ],
     "secrets": [
-      { "name": "RAILS_MASTER_KEY", "valueFrom": "${rails_master_key}" }
+      { "name": "RAILS_MASTER_KEY", "valueFrom": "${rails_master_key_arn}" }
     ],
     "portMappings": [
       { "containerPort": ${container_port}, "protocol": "tcp" }
@@ -18,7 +18,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "${awslogs_group}",
+        "awslogs-group": "${log_group_name}",
         "awslogs-region": "${region}",
         "awslogs-stream-prefix": "ecs"
       }

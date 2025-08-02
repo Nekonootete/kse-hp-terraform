@@ -1,6 +1,6 @@
 resource "aws_route53_record" "this" {
   zone_id = var.zone_id
-  name    = var.name
+  name    = split(".", var.fqdn)[0]
   type    = "A"
   alias {
     name                   = var.alb_dns_name

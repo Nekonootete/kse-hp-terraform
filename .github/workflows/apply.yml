@@ -55,7 +55,7 @@ jobs:
 
       - name: Get outputs
         run: |
-          keys=(rds_endpoint db_name db_username rds_ssm_name stor_bucket_id env_bucket_id api_fqdn service_cloud_map_rails private_dns_name)
+          keys=(db_address db_name db_username db_password_name app_bucket_id env_bucket_id api_fqdn rails_service_cloud_map private_dns_name)
           for key in "${keys[@]}"; do
             val="$(terraform output -raw "$key")"
             echo "::add-mask::$val"
@@ -67,7 +67,7 @@ jobs:
         id: dbpw
         run: |
           PW=$(aws ssm get-parameter \
-            --name "$RDS_SSM_NAME" \
+            --name "$DB_PASSWORD_NAME" \
             --with-decryption \
             --query 'Parameter.Value' \
             --output text)
@@ -77,16 +77,16 @@ jobs:
       - name: Build env file for container
         run: |
           cat > .env <<EOF
-          DB_HOST=$RDS_ENDPOINT
+          DB_HOST=$DB_ADDRESS
           DB_PORT=5432
           DB_NAME=$DB_NAME
           DB_USERNAME=$DB_USERNAME
           DB_PASSWORD=$DB_PASSWORD
           AWS_REGION=$AWS_REGION
-          AWS_S3_BUCKET=$STOR_BUCKET_ID
+          AWS_S3_BUCKET=$APP_BUCKET_ID
           API_HOST=$API_FQDN
           API_PROTOCOL=https
-          RAILS_URL=http://$SERVICE_CLOUD_MAP_RAILS.$PRIVATE_DNS_NAME:3001
+          RAILS_URL=http://$RAILS_SERVICE_CLOUD_MAP.$PRIVATE_DNS_NAME:3001
           SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
           EOF
 

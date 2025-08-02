@@ -1,4 +1,4 @@
-resource "aws_lb" "this" {
+resource "aws_lb" "alb" {
   name               = "alb-${var.project_name}-${var.environment}"
   load_balancer_type = "application"
   subnets            = var.public_subnet_ids
@@ -11,7 +11,7 @@ resource "aws_lb" "this" {
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.this.arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
   default_action {
@@ -25,7 +25,7 @@ resource "aws_lb_listener" "http" {
 }
 
 resource "aws_lb_listener" "https" {
-  load_balancer_arn = aws_lb.this.arn
+  load_balancer_arn = aws_lb.alb.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy       = "ELBSecurityPolicy-2016-08"
@@ -34,6 +34,20 @@ resource "aws_lb_listener" "https" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.next.arn
+  }
+}
+
+resource "aws_lb_listener_rule" "rails" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 20
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.rails.arn
+  }
+  condition {
+    host_header {
+      values = [var.api_fqdn]
+    }
   }
 }
 

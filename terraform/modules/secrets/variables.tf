@@ -1,1 +1,2 @@
-variable "project_name"      { type = string }
+variable "name"      { type = string }
+variable "file_path" { type = string }

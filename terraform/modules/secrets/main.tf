@@ -1,8 +1,8 @@
-resource "aws_secretsmanager_secret" "rails_master_key" {
-  name = "${ var.project_name }/rails/production-master-key"
+resource "aws_secretsmanager_secret" "this" {
+  name = var.name
 }
 
-resource "aws_secretsmanager_secret_version" "rails_master_key" {
-  secret_id     = aws_secretsmanager_secret.rails_master_key.id
-  secret_string = file("${path.root}/config/credentials/production.key")
+resource "aws_secretsmanager_secret_version" "this" {
+  secret_id     = aws_secretsmanager_secret.this.id
+  secret_string = file(var.file_path)
 }
