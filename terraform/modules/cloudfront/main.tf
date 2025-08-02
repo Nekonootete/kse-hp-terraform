@@ -27,6 +27,21 @@ resource "aws_cloudfront_origin_request_policy" "all_viewer" {
   }
 }
 
+resource "aws_cloudfront_origin_request_policy" "no_forward" {
+  name = "no-forward-${var.project_name}-${var.environment}"
+  comment = "Forward no headers to ALB"
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+  headers_config {
+    header_behavior = "none"
+  }
+  query_strings_config {
+    query_string_behavior = "none"
+  }
+}
+
 resource "aws_cloudfront_cache_policy" "caching_disabled" {
   name        = "caching-disabled-${var.project_name}-${var.environment}"
   comment     = "Disable cache for dynamic ALB origin"
@@ -74,7 +89,7 @@ resource "aws_cloudfront_distribution" "cdn" {
     viewer_protocol_policy   = "https-only"
     allowed_methods          = ["GET", "HEAD"]
     cached_methods           = ["GET", "HEAD"]
-    origin_request_policy_id = "none"
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.no_forward.id
     cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6"
     compress                 = true
   }
@@ -85,7 +100,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   viewer_protocol_policy   = "https-only"
   allowed_methods          = ["GET", "HEAD"]
   cached_methods           = ["GET", "HEAD"]
-  origin_request_policy_id = "none"
+  origin_request_policy_id = aws_cloudfront_origin_request_policy.no_forward.id
   cache_policy_id          = "b2884449-e4de-46a7-ac36-70bc7f1ddd6d"
   compress                 = true
 }
