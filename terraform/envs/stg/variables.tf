@@ -13,7 +13,6 @@ variable "cdn_fqdn" { type = string }
 variable "db_name" { type = string }
 variable "db_username" { type = string }
 variable "env_file_name" { type = string }
-variable "api_sub_domain" { type = string }
 variable "next_service_cloud_map" { type = string }
 variable "rails_service_cloud_map" { type = string }
 

@@ -3,7 +3,7 @@ data "aws_iam_policy_document" "vpce_read" {
     sid        = "AllowVPCEndpointAccess"
     effect     = "Allow"
     actions    = ["s3:GetObject","s3:ListBucket"]
-    resources  = [var.bucket.arn, "${var.bucket.arn}/*"]
+    resources  = [var.app_bucket.arn, "${var.app_bucket.arn}/*"]
 
     principals {
       type = "*"
@@ -13,13 +13,13 @@ data "aws_iam_policy_document" "vpce_read" {
     condition {
       test     = "StringEquals"
       variable = "aws:sourceVpce"
-      values   = [var.s3_vpc_endpoint_id]
+      values   = [var.s3_vpce_id]
     }
   }
 }
 
 resource "aws_s3_bucket_policy" "this" {
-  bucket      = var.bucket_id
+  bucket      = var.app_bucket_id
   policy      = jsonencode({
     Version   = "2012-10-17"
     Statement = concat(

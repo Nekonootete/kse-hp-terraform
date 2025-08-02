@@ -151,10 +151,10 @@ module "cloudfront" {
 }
 
 module "app_bucket_policy" {
-  source              = "../../modules/s3_policy"
-  app_bucket_id       = module.app_bucket.id
-  app_bucket_arn      = module.app_bucket.arn
-  vpc_endpoint_id     = module.vpce.s3_vpc_endpoint_id
+  source         = "../../modules/app_s3_policy"
+  app_bucket_id  = module.app_bucket.id
+  app_bucket_arn = module.app_bucket.arn
+  s3_vpce_id     = module.vpce.s3_vpce_id
 }
 
 module "next_ecr" {
