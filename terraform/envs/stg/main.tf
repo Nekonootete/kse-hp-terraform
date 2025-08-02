@@ -243,7 +243,7 @@ module "rails_task" {
 module "private_dns" {
   source = "../../modules/private_dns"
   vpc_id = module.network.vpc_id
-  fqdn   = "pri.${var.domain_name}"
+  name   = "internal"
 }
 
 module "next_service" {

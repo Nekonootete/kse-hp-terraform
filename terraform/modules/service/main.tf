@@ -41,9 +41,4 @@ resource "aws_ecs_service" "this" {
   service_registries {
     registry_arn = aws_service_discovery_service.this.arn
   }
-
-  ordered_placement_strategy {
-    type  = "spread"
-    field = "attribute:ecs.availability-zone"
-  }
 }
