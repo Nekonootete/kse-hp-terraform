@@ -74,6 +74,7 @@ module "vpce" {
   ecr_vpce_sg_ids         = [module.security.ecr_vpce_sg_id]
   cwlogs_vpce_sg_ids      = [module.security.cwlogs_vpce_sg_id]
   sm_vpce_sg_ids          = [module.security.sm_vpce_sg_id]
+  ssm_vpce_sg_ids         = [module.security.ssm_vpce_sg_id]
 }
 
 module "alb" {
