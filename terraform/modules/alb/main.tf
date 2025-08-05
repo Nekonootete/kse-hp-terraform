@@ -45,7 +45,7 @@ resource "aws_lb_target_group" "next" {
   target_type = "ip"
 
   health_check {
-    path              = "/"
+    path              = "/plans"
     protocol          = "HTTP"
     interval          = 60
     timeout           = 30
