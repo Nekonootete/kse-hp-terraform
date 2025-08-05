@@ -140,8 +140,8 @@ resource "aws_security_group" "sm_vpce" {
   }
 }
 
-resource "aws_security_group" "ssm_vpce" {
-  name        = "ssm-vpce-${var.project_name}-${var.environment}"
+resource "aws_security_group" "ssmm_vpce" {
+  name        = "ssmm-vpce-${var.project_name}-${var.environment}"
   vpc_id      = var.vpc_id
 
   ingress {

@@ -64,17 +64,17 @@ module "security" {
 }
 
 module "vpce" {
-  source                  = "../../modules/vpce"
-  environment             = var.environment
-  project_name            = var.project_name
-  region                  = var.region
-  vpc_id                  = module.network.vpc_id
-  private_subnet_ids      = module.network.private_subnet_ids
-  private_route_table_ids = [module.network.private_route_table_id]
-  ecr_vpce_sg_ids         = [module.security.ecr_vpce_sg_id]
-  cwlogs_vpce_sg_ids      = [module.security.cwlogs_vpce_sg_id]
-  sm_vpce_sg_ids          = [module.security.sm_vpce_sg_id]
-  ssm_vpce_sg_ids         = [module.security.ssm_vpce_sg_id]
+  source                   = "../../modules/vpce"
+  environment              = var.environment
+  project_name             = var.project_name
+  region                   = var.region
+  vpc_id                   = module.network.vpc_id
+  private_subnet_ids       = module.network.private_subnet_ids
+  private_route_table_ids  = [module.network.private_route_table_id]
+  ecr_vpce_sg_ids          = [module.security.ecr_vpce_sg_id]
+  cwlogs_vpce_sg_ids       = [module.security.cwlogs_vpce_sg_id]
+  sm_vpce_sg_ids           = [module.security.sm_vpce_sg_id]
+  ssmm_vpce_sg_ids         = [module.security.ssmm_vpce_sg_id]
 }
 
 module "alb" {

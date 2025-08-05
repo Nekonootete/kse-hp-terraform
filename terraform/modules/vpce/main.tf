@@ -61,15 +61,15 @@ resource "aws_vpc_endpoint" "secretsmanager" {
   }
 }
 
-resource "aws_vpc_endpoint" "ssm" {
+resource "aws_vpc_endpoint" "ssmm" {
   vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.region}.ssm"
+  service_name        = "com.amazonaws.${var.region}.ssmmessages"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = var.private_subnet_ids
-  security_group_ids  = var.ssm_vpce_sg_ids
+  security_group_ids  = var.ssmm_vpce_sg_ids
   private_dns_enabled = true
 
   tags = {
-    Name = "ssm-${var.project_name}-${var.environment}"
+    Name = "ssmm-${var.project_name}-${var.environment}"
   }
 }

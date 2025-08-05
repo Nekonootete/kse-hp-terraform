@@ -7,4 +7,4 @@ variable "private_route_table_ids"  { type = list(string) }
 variable "ecr_vpce_sg_ids"          { type = list(string) }
 variable "cwlogs_vpce_sg_ids"       { type = list(string) }
 variable "sm_vpce_sg_ids"           { type = list(string) }
-variable "ssm_vpce_sg_ids"          { type = list(string) }
+variable "ssmm_vpce_sg_ids"         { type = list(string) }
