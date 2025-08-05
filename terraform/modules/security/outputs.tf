@@ -5,3 +5,4 @@ output "db_sg_id"          { value = aws_security_group.db.id }
 output "ecr_vpce_sg_id"    { value = aws_security_group.ecr_vpce.id }
 output "cwlogs_vpce_sg_id" { value = aws_security_group.cwlogs_vpce.id }
 output "sm_vpce_sg_id"     { value = aws_security_group.sm_vpce.id }
+output "ssm_vpce_sg_id"    { value = aws_security_group.ssm_vpce.id }
