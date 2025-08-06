@@ -279,7 +279,7 @@
             "constant_value": 60
            },
            "path": {
-            "constant_value": "/"
+            "constant_value": "/plans"
            },
            "protocol": {
             "constant_value": "HTTP"
@@ -593,6 +593,7 @@
            "actions": {
             "constant_value": [
              "s3:GetObject",
+             "s3:PutObject",
              "s3:ListBucket"
             ]
            },
@@ -3235,6 +3236,14 @@
           "aws_security_group.sm_vpce"
          ]
         }
+       },
+       "ssmm_vpce_sg_id": {
+        "expression": {
+         "references": [
+          "aws_security_group.ssmm_vpce.id",
+          "aws_security_group.ssmm_vpce"
+         ]
+        }
        }
       },
       "resources": [
@@ -3589,6 +3598,52 @@
         "provider_config_key": "aws",
         "schema_version": 1,
         "type": "aws_security_group"
+       },
+       {
+        "address": "aws_security_group.ssmm_vpce",
+        "expressions": {
+         "egress": {
+          "constant_value": [
+           {
+            "cidr_blocks": [
+             "0.0.0.0/0"
+            ],
+            "description": null,
+            "from_port": 0,
+            "ipv6_cidr_blocks": null,
+            "prefix_list_ids": null,
+            "protocol": "-1",
+            "security_groups": null,
+            "self": null,
+            "to_port": 0
+           }
+          ]
+         },
+         "ingress": {
+          "references": [
+           "aws_security_group.next.id",
+           "aws_security_group.next",
+           "aws_security_group.rails.id",
+           "aws_security_group.rails"
+          ]
+         },
+         "name": {
+          "references": [
+           "var.project_name",
+           "var.environment"
+          ]
+         },
+         "vpc_id": {
+          "references": [
+           "var.vpc_id"
+          ]
+         }
+        },
+        "mode": "managed",
+        "name": "ssmm_vpce",
+        "provider_config_key": "aws",
+        "schema_version": 1,
+        "type": "aws_security_group"
        }
       ],
       "variables": {
@@ -3934,6 +3989,28 @@
         "type": "aws_iam_policy"
        },
        {
+        "address": "aws_iam_policy.ecs_exec_ssm",
+        "expressions": {
+         "name": {
+          "references": [
+           "var.project_name",
+           "var.environment"
+          ]
+         },
+         "policy": {
+          "references": [
+           "data.aws_iam_policy_document.ecs_exec_ssm.json",
+           "data.aws_iam_policy_document.ecs_exec_ssm"
+          ]
+         }
+        },
+        "mode": "managed",
+        "name": "ecs_exec_ssm",
+        "provider_config_key": "aws",
+        "schema_version": 0,
+        "type": "aws_iam_policy"
+       },
+       {
         "address": "aws_iam_policy.env_bucket_read",
         "expressions": {
          "name": {
@@ -4107,6 +4184,28 @@
         "type": "aws_iam_role_policy_attachment"
        },
        {
+        "address": "aws_iam_role_policy_attachment.task_ecs_exec_ssm_attach",
+        "expressions": {
+         "policy_arn": {
+          "references": [
+           "aws_iam_policy.ecs_exec_ssm.arn",
+           "aws_iam_policy.ecs_exec_ssm"
+          ]
+         },
+         "role": {
+          "references": [
+           "aws_iam_role.task.name",
+           "aws_iam_role.task"
+          ]
+         }
+        },
+        "mode": "managed",
+        "name": "task_ecs_exec_ssm_attach",
+        "provider_config_key": "aws",
+        "schema_version": 0,
+        "type": "aws_iam_role_policy_attachment"
+       },
+       {
         "address": "data.aws_iam_policy_document.app_bucket_read",
         "expressions": {
          "statement": [
@@ -4134,6 +4233,36 @@
         },
         "mode": "data",
         "name": "app_bucket_read",
+        "provider_config_key": "aws",
+        "schema_version": 0,
+        "type": "aws_iam_policy_document"
+       },
+       {
+        "address": "data.aws_iam_policy_document.ecs_exec_ssm",
+        "expressions": {
+         "statement": [
+          {
+           "actions": {
+            "constant_value": [
+             "ssmmessages:CreateControlChannel",
+             "ssmmessages:CreateDataChannel",
+             "ssmmessages:OpenControlChannel",
+             "ssmmessages:OpenDataChannel"
+            ]
+           },
+           "effect": {
+            "constant_value": "Allow"
+           },
+           "resources": {
+            "constant_value": [
+             "*"
+            ]
+           }
+          }
+         ]
+        },
+        "mode": "data",
+        "name": "ecs_exec_ssm",
         "provider_config_key": "aws",
         "schema_version": 0,
         "type": "aws_iam_policy_document"
@@ -4284,6 +4413,12 @@
       "sm_vpce_sg_ids": {
        "references": [
         "module.security.sm_vpce_sg_id",
+        "module.security"
+       ]
+      },
+      "ssmm_vpce_sg_ids": {
+       "references": [
+        "module.security.ssmm_vpce_sg_id",
         "module.security"
        ]
       },
@@ -4501,6 +4636,48 @@
         "provider_config_key": "aws",
         "schema_version": 0,
         "type": "aws_vpc_endpoint"
+       },
+       {
+        "address": "aws_vpc_endpoint.ssmm",
+        "expressions": {
+         "private_dns_enabled": {
+          "constant_value": true
+         },
+         "security_group_ids": {
+          "references": [
+           "var.ssmm_vpce_sg_ids"
+          ]
+         },
+         "service_name": {
+          "references": [
+           "var.region"
+          ]
+         },
+         "subnet_ids": {
+          "references": [
+           "var.private_subnet_ids"
+          ]
+         },
+         "tags": {
+          "references": [
+           "var.project_name",
+           "var.environment"
+          ]
+         },
+         "vpc_endpoint_type": {
+          "constant_value": "Interface"
+         },
+         "vpc_id": {
+          "references": [
+           "var.vpc_id"
+          ]
+         }
+        },
+        "mode": "managed",
+        "name": "ssmm",
+        "provider_config_key": "aws",
+        "schema_version": 0,
+        "type": "aws_vpc_endpoint"
        }
       ],
       "variables": {
@@ -4512,6 +4689,7 @@
        "project_name": {},
        "region": {},
        "sm_vpce_sg_ids": {},
+       "ssmm_vpce_sg_ids": {},
        "vpc_id": {}
       }
      },
@@ -4576,6 +4754,13 @@
       "references": [
        "module.env_bucket.id",
        "module.env_bucket"
+      ]
+     }
+    },
+    "fqdn": {
+     "expression": {
+      "references": [
+       "var.fqdn"
       ]
      }
     },
@@ -4722,6 +4907,16 @@
    "before": "env-kse-hp-stg",
    "before_sensitive": false
   },
+  "fqdn": {
+   "actions": [
+    "no-op"
+   ],
+   "after": "stg.sr-kse.com",
+   "after_sensitive": false,
+   "after_unknown": false,
+   "before": "stg.sr-kse.com",
+   "before_sensitive": false
+  },
   "private_dns_name": {
    "actions": [
     "no-op"
@@ -4784,6 +4979,11 @@
     "sensitive": false,
     "type": "string",
     "value": "env-kse-hp-stg"
+   },
+   "fqdn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "stg.sr-kse.com"
    },
    "private_dns_name": {
     "sensitive": false,
@@ -5106,7 +5306,7 @@
           "healthy_threshold": 3,
           "interval": 60,
           "matcher": "200",
-          "path": "/",
+          "path": "/plans",
           "port": "traffic-port",
           "protocol": "HTTP",
           "timeout": 30,
@@ -5366,7 +5566,7 @@
         "logging": [],
         "object_lock_configuration": [],
         "object_lock_enabled": false,
-        "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
+        "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
         "region": "ap-northeast-1",
         "replication_configuration": [],
         "request_payer": "BucketOwner",
@@ -5463,7 +5663,7 @@
        "values": {
         "bucket": "kse-hp-stg",
         "id": "kse-hp-stg",
-        "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
+        "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
        }
       }
      ]
@@ -8090,6 +8290,83 @@
         "timeouts": null,
         "vpc_id": "vpc-030f88f0accdceb65"
        }
+      },
+      {
+       "address": "module.security.aws_security_group.ssmm_vpce",
+       "mode": "managed",
+       "name": "ssmm_vpce",
+       "provider_name": "registry.terraform.io/hashicorp/aws",
+       "schema_version": 1,
+       "sensitive_values": {
+        "egress": [
+         {
+          "cidr_blocks": [
+           false
+          ],
+          "ipv6_cidr_blocks": [],
+          "prefix_list_ids": [],
+          "security_groups": []
+         }
+        ],
+        "ingress": [
+         {
+          "cidr_blocks": [],
+          "ipv6_cidr_blocks": [],
+          "prefix_list_ids": [],
+          "security_groups": [
+           false,
+           false
+          ]
+         }
+        ],
+        "tags": {},
+        "tags_all": {}
+       },
+       "type": "aws_security_group",
+       "values": {
+        "arn": "arn:aws:ec2:ap-northeast-1:021891612086:security-group/sg-097b4fce8f4e6e300",
+        "description": "Managed by Terraform",
+        "egress": [
+         {
+          "cidr_blocks": [
+           "0.0.0.0/0"
+          ],
+          "description": "",
+          "from_port": 0,
+          "ipv6_cidr_blocks": [],
+          "prefix_list_ids": [],
+          "protocol": "-1",
+          "security_groups": [],
+          "self": false,
+          "to_port": 0
+         }
+        ],
+        "id": "sg-097b4fce8f4e6e300",
+        "ingress": [
+         {
+          "cidr_blocks": [],
+          "description": "HTTPS from ECS tasks",
+          "from_port": 443,
+          "ipv6_cidr_blocks": [],
+          "prefix_list_ids": [],
+          "protocol": "tcp",
+          "security_groups": [
+           "sg-048137c8de74def11",
+           "sg-0a1de64b8339079d4"
+          ],
+          "self": false,
+          "to_port": 443
+         }
+        ],
+        "name": "ssmm-vpce-kse-hp-stg",
+        "name_prefix": "",
+        "owner_id": "021891612086",
+        "revoke_rules_on_delete": false,
+        "tags": {},
+        "tags_all": {},
+        "timeouts": null,
+        "vpc_id": "vpc-030f88f0accdceb65"
+       }
       }
      ]
     },
@@ -8704,6 +8981,31 @@
        }
       },
       {
+       "address": "module.task_iam.aws_iam_policy.ecs_exec_ssm",
+       "mode": "managed",
+       "name": "ecs_exec_ssm",
+       "provider_name": "registry.terraform.io/hashicorp/aws",
+       "schema_version": 0,
+       "sensitive_values": {
+        "tags": {},
+        "tags_all": {}
+       },
+       "type": "aws_iam_policy",
+       "values": {
+        "arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+        "attachment_count": 1,
+        "description": "",
+        "id": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+        "name": "ecs_exec_ssm-kse-hp-stg",
+        "name_prefix": "",
+        "path": "/",
+        "policy": "{\"Statement\":[{\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+        "policy_id": "ANPAQKGGXPW3PR3476RK5",
+        "tags": {},
+        "tags_all": {}
+       }
+      },
+      {
        "address": "module.task_iam.aws_iam_policy.env_bucket_read",
        "mode": "managed",
        "name": "env_bucket_read",
@@ -8802,6 +9104,7 @@
        "sensitive_values": {
         "inline_policy": [],
         "managed_policy_arns": [
+         false,
          false
         ],
         "tags": {},
@@ -8817,7 +9120,8 @@
         "id": "task-role-kse-hp-stg",
         "inline_policy": [],
         "managed_policy_arns": [
-         "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg"
+         "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg",
+         "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg"
         ],
         "max_session_duration": 3600,
         "name": "task-role-kse-hp-stg",
@@ -8882,6 +9186,20 @@
        "values": {
         "id": "task-role-kse-hp-stg-20250802165631719800000006",
         "policy_arn": "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg",
+        "role": "task-role-kse-hp-stg"
+       }
+      },
+      {
+       "address": "module.task_iam.aws_iam_role_policy_attachment.task_ecs_exec_ssm_attach",
+       "mode": "managed",
+       "name": "task_ecs_exec_ssm_attach",
+       "provider_name": "registry.terraform.io/hashicorp/aws",
+       "schema_version": 0,
+       "sensitive_values": {},
+       "type": "aws_iam_role_policy_attachment",
+       "values": {
+        "id": "task-role-kse-hp-stg-20250805133544434200000001",
+        "policy_arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
         "role": "task-role-kse-hp-stg"
        }
       }
@@ -9457,6 +9775,118 @@
         "vpc_endpoint_type": "Interface",
         "vpc_id": "vpc-030f88f0accdceb65"
        }
+      },
+      {
+       "address": "module.vpce.aws_vpc_endpoint.ssmm",
+       "mode": "managed",
+       "name": "ssmm",
+       "provider_name": "registry.terraform.io/hashicorp/aws",
+       "schema_version": 0,
+       "sensitive_values": {
+        "cidr_blocks": [],
+        "dns_entry": [
+         {},
+         {},
+         {},
+         {}
+        ],
+        "dns_options": [
+         {}
+        ],
+        "network_interface_ids": [
+         false,
+         false
+        ],
+        "route_table_ids": [],
+        "security_group_ids": [
+         false
+        ],
+        "subnet_configuration": [
+         {},
+         {}
+        ],
+        "subnet_ids": [
+         false,
+         false
+        ],
+        "tags": {},
+        "tags_all": {}
+       },
+       "type": "aws_vpc_endpoint",
+       "values": {
+        "arn": "arn:aws:ec2:ap-northeast-1:021891612086:vpc-endpoint/vpce-0ff78a01377062623",
+        "auto_accept": null,
+        "cidr_blocks": [],
+        "dns_entry": [
+         {
+          "dns_name": "vpce-0ff78a01377062623-8345lg9p.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+          "hosted_zone_id": "Z2E726K9Y6RL4W"
+         },
+         {
+          "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1a.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+          "hosted_zone_id": "Z2E726K9Y6RL4W"
+         },
+         {
+          "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1c.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+          "hosted_zone_id": "Z2E726K9Y6RL4W"
+         },
+         {
+          "dns_name": "ssmmessages.ap-northeast-1.amazonaws.com",
+          "hosted_zone_id": "Z009520329BL8F4YNH6PB"
+         }
+        ],
+        "dns_options": [
+         {
+          "dns_record_ip_type": "ipv4",
+          "private_dns_only_for_inbound_resolver_endpoint": false
+         }
+        ],
+        "id": "vpce-0ff78a01377062623",
+        "ip_address_type": "ipv4",
+        "network_interface_ids": [
+         "eni-01b2ce32a0601b18d",
+         "eni-0d3075377c30894b7"
+        ],
+        "owner_id": "021891612086",
+        "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+        "prefix_list_id": null,
+        "private_dns_enabled": true,
+        "requester_managed": false,
+        "resource_configuration_arn": "",
+        "route_table_ids": [],
+        "security_group_ids": [
+         "sg-097b4fce8f4e6e300"
+        ],
+        "service_name": "com.amazonaws.ap-northeast-1.ssmmessages",
+        "service_network_arn": "",
+        "service_region": "ap-northeast-1",
+        "state": "available",
+        "subnet_configuration": [
+         {
+          "ipv4": "10.10.3.72",
+          "ipv6": "",
+          "subnet_id": "subnet-0005a361752a78b57"
+         },
+         {
+          "ipv4": "10.10.4.15",
+          "ipv6": "",
+          "subnet_id": "subnet-067ee653df50cef08"
+         }
+        ],
+        "subnet_ids": [
+         "subnet-0005a361752a78b57",
+         "subnet-067ee653df50cef08"
+        ],
+        "tags": {
+         "Name": "ssmm-kse-hp-stg"
+        },
+        "tags_all": {
+         "Name": "ssmm-kse-hp-stg"
+        },
+        "timeouts": null,
+        "vpc_endpoint_type": "Interface",
+        "vpc_id": "vpc-030f88f0accdceb65"
+       }
       }
      ]
     }
@@ -9507,6 +9937,11 @@
      "sensitive": false,
      "type": "string",
      "value": "env-kse-hp-stg"
+    },
+    "fqdn": {
+     "sensitive": false,
+     "type": "string",
+     "value": "stg.sr-kse.com"
     },
     "private_dns_name": {
      "sensitive": false,
@@ -9855,7 +10290,7 @@
            "healthy_threshold": 3,
            "interval": 60,
            "matcher": "200",
-           "path": "/",
+           "path": "/plans",
            "port": "traffic-port",
            "protocol": "HTTP",
            "timeout": 30,
@@ -10118,7 +10553,7 @@
          "logging": [],
          "object_lock_configuration": [],
          "object_lock_enabled": false,
-         "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
+         "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
          "region": "ap-northeast-1",
          "replication_configuration": [],
          "request_payer": "BucketOwner",
@@ -10221,6 +10656,7 @@
           {
            "actions": [
             false,
+            false,
             false
            ],
            "condition": [
@@ -10249,9 +10685,9 @@
         },
         "type": "aws_iam_policy_document",
         "values": {
-         "id": "4182981211",
-         "json": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"AllowVPCEndpointAccess\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:ListBucket\",\n        \"s3:GetObject\"\n      ],\n      \"Resource\": [\n        \"arn:aws:s3:::kse-hp-stg/*\",\n        \"arn:aws:s3:::kse-hp-stg\"\n      ],\n      \"Principal\": \"*\",\n      \"Condition\": {\n        \"StringEquals\": {\n          \"aws:sourceVpce\": \"vpce-08d78ba0bd6e1502f\"\n        }\n      }\n    }\n  ]\n}",
-         "minified_json": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AllowVPCEndpointAccess\",\"Effect\":\"Allow\",\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Principal\":\"*\",\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}}}]}",
+         "id": "334702862",
+         "json": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"AllowVPCEndpointAccess\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:PutObject\",\n        \"s3:ListBucket\",\n        \"s3:GetObject\"\n      ],\n      \"Resource\": [\n        \"arn:aws:s3:::kse-hp-stg/*\",\n        \"arn:aws:s3:::kse-hp-stg\"\n      ],\n      \"Principal\": \"*\",\n      \"Condition\": {\n        \"StringEquals\": {\n          \"aws:sourceVpce\": \"vpce-08d78ba0bd6e1502f\"\n        }\n      }\n    }\n  ]\n}",
+         "minified_json": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AllowVPCEndpointAccess\",\"Effect\":\"Allow\",\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Principal\":\"*\",\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}}}]}",
          "override_json": null,
          "override_policy_documents": null,
          "policy_id": null,
@@ -10261,7 +10697,8 @@
           {
            "actions": [
             "s3:GetObject",
-            "s3:ListBucket"
+            "s3:ListBucket",
+            "s3:PutObject"
            ],
            "condition": [
             {
@@ -10312,7 +10749,7 @@
         "values": {
          "bucket": "kse-hp-stg",
          "id": "kse-hp-stg",
-         "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
+         "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
         }
        }
       ]
@@ -12071,7 +12508,7 @@
          ],
          "tags": {},
          "tags_all": {},
-         "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-next:52",
+         "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-next:73",
          "timeouts": null,
          "triggers": {},
          "volume_configuration": [],
@@ -12505,7 +12942,7 @@
          ],
          "tags": {},
          "tags_all": {},
-         "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-rails:66",
+         "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-rails:95",
          "timeouts": null,
          "triggers": {},
          "volume_configuration": [],
@@ -13226,6 +13663,89 @@
           }
          ],
          "name": "sm-vpce-kse-hp-stg",
+         "name_prefix": "",
+         "owner_id": "021891612086",
+         "revoke_rules_on_delete": false,
+         "tags": {},
+         "tags_all": {},
+         "timeouts": null,
+         "vpc_id": "vpc-030f88f0accdceb65"
+        }
+       },
+       {
+        "address": "module.security.aws_security_group.ssmm_vpce",
+        "depends_on": [
+         "module.network.aws_vpc.vpc",
+         "module.security.aws_security_group.alb",
+         "module.security.aws_security_group.next",
+         "module.security.aws_security_group.rails"
+        ],
+        "mode": "managed",
+        "name": "ssmm_vpce",
+        "provider_name": "registry.terraform.io/hashicorp/aws",
+        "schema_version": 1,
+        "sensitive_values": {
+         "egress": [
+          {
+           "cidr_blocks": [
+            false
+           ],
+           "ipv6_cidr_blocks": [],
+           "prefix_list_ids": [],
+           "security_groups": []
+          }
+         ],
+         "ingress": [
+          {
+           "cidr_blocks": [],
+           "ipv6_cidr_blocks": [],
+           "prefix_list_ids": [],
+           "security_groups": [
+            false,
+            false
+           ]
+          }
+         ],
+         "tags": {},
+         "tags_all": {}
+        },
+        "type": "aws_security_group",
+        "values": {
+         "arn": "arn:aws:ec2:ap-northeast-1:021891612086:security-group/sg-097b4fce8f4e6e300",
+         "description": "Managed by Terraform",
+         "egress": [
+          {
+           "cidr_blocks": [
+            "0.0.0.0/0"
+           ],
+           "description": "",
+           "from_port": 0,
+           "ipv6_cidr_blocks": [],
+           "prefix_list_ids": [],
+           "protocol": "-1",
+           "security_groups": [],
+           "self": false,
+           "to_port": 0
+          }
+         ],
+         "id": "sg-097b4fce8f4e6e300",
+         "ingress": [
+          {
+           "cidr_blocks": [],
+           "description": "HTTPS from ECS tasks",
+           "from_port": 443,
+           "ipv6_cidr_blocks": [],
+           "prefix_list_ids": [],
+           "protocol": "tcp",
+           "security_groups": [
+            "sg-048137c8de74def11",
+            "sg-0a1de64b8339079d4"
+           ],
+           "self": false,
+           "to_port": 443
+          }
+         ],
+         "name": "ssmm-vpce-kse-hp-stg",
          "name_prefix": "",
          "owner_id": "021891612086",
          "revoke_rules_on_delete": false,
@@ -14180,6 +14700,65 @@
         }
        },
        {
+        "address": "module.task_iam.data.aws_iam_policy_document.ecs_exec_ssm",
+        "mode": "data",
+        "name": "ecs_exec_ssm",
+        "provider_name": "registry.terraform.io/hashicorp/aws",
+        "schema_version": 0,
+        "sensitive_values": {
+         "statement": [
+          {
+           "actions": [
+            false,
+            false,
+            false,
+            false
+           ],
+           "condition": [],
+           "not_actions": [],
+           "not_principals": [],
+           "not_resources": [],
+           "principals": [],
+           "resources": [
+            false
+           ]
+          }
+         ]
+        },
+        "type": "aws_iam_policy_document",
+        "values": {
+         "id": "3621793318",
+         "json": "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"ssmmessages:OpenDataChannel\",\n        \"ssmmessages:OpenControlChannel\",\n        \"ssmmessages:CreateDataChannel\",\n        \"ssmmessages:CreateControlChannel\"\n      ],\n      \"Resource\": \"*\"\n    }\n  ]\n}",
+         "minified_json": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\"],\"Resource\":\"*\"}]}",
+         "override_json": null,
+         "override_policy_documents": null,
+         "policy_id": null,
+         "source_json": null,
+         "source_policy_documents": null,
+         "statement": [
+          {
+           "actions": [
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel"
+           ],
+           "condition": [],
+           "effect": "Allow",
+           "not_actions": [],
+           "not_principals": [],
+           "not_resources": [],
+           "principals": [],
+           "resources": [
+            "*"
+           ],
+           "sid": ""
+          }
+         ],
+         "version": "2012-10-17"
+        }
+       },
+       {
         "address": "module.task_iam.data.aws_iam_policy_document.env_bucket_read",
         "mode": "data",
         "name": "env_bucket_read",
@@ -14377,6 +14956,34 @@
         }
        },
        {
+        "address": "module.task_iam.aws_iam_policy.ecs_exec_ssm",
+        "depends_on": [
+         "module.task_iam.data.aws_iam_policy_document.ecs_exec_ssm"
+        ],
+        "mode": "managed",
+        "name": "ecs_exec_ssm",
+        "provider_name": "registry.terraform.io/hashicorp/aws",
+        "schema_version": 0,
+        "sensitive_values": {
+         "tags": {},
+         "tags_all": {}
+        },
+        "type": "aws_iam_policy",
+        "values": {
+         "arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+         "attachment_count": 1,
+         "description": "",
+         "id": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+         "name": "ecs_exec_ssm-kse-hp-stg",
+         "name_prefix": "",
+         "path": "/",
+         "policy": "{\"Statement\":[{\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+         "policy_id": "ANPAQKGGXPW3PR3476RK5",
+         "tags": {},
+         "tags_all": {}
+        }
+       },
+       {
         "address": "module.task_iam.aws_iam_policy.env_bucket_read",
         "depends_on": [
          "module.env_bucket.aws_s3_bucket.this",
@@ -14489,6 +15096,7 @@
         "sensitive_values": {
          "inline_policy": [],
          "managed_policy_arns": [
+          false,
           false
          ],
          "tags": {},
@@ -14504,7 +15112,8 @@
          "id": "task-role-kse-hp-stg",
          "inline_policy": [],
          "managed_policy_arns": [
-          "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg"
+          "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg",
+          "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg"
          ],
          "max_session_duration": 3600,
          "name": "task-role-kse-hp-stg",
@@ -14594,6 +15203,26 @@
         "values": {
          "id": "task-role-kse-hp-stg-20250802165631719800000006",
          "policy_arn": "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg",
+         "role": "task-role-kse-hp-stg"
+        }
+       },
+       {
+        "address": "module.task_iam.aws_iam_role_policy_attachment.task_ecs_exec_ssm_attach",
+        "depends_on": [
+         "module.task_iam.aws_iam_policy.ecs_exec_ssm",
+         "module.task_iam.aws_iam_role.task",
+         "module.task_iam.data.aws_iam_policy_document.ecs_exec_ssm",
+         "module.task_iam.data.aws_iam_policy_document.exec_assume"
+        ],
+        "mode": "managed",
+        "name": "task_ecs_exec_ssm_attach",
+        "provider_name": "registry.terraform.io/hashicorp/aws",
+        "schema_version": 0,
+        "sensitive_values": {},
+        "type": "aws_iam_role_policy_attachment",
+        "values": {
+         "id": "task-role-kse-hp-stg-20250805133544434200000001",
+         "policy_arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
          "role": "task-role-kse-hp-stg"
         }
        }
@@ -15205,6 +15834,126 @@
          "vpc_endpoint_type": "Interface",
          "vpc_id": "vpc-030f88f0accdceb65"
         }
+       },
+       {
+        "address": "module.vpce.aws_vpc_endpoint.ssmm",
+        "depends_on": [
+         "module.network.aws_subnet.private",
+         "module.network.aws_vpc.vpc",
+         "module.security.aws_security_group.alb",
+         "module.security.aws_security_group.next",
+         "module.security.aws_security_group.rails",
+         "module.security.aws_security_group.ssmm_vpce"
+        ],
+        "mode": "managed",
+        "name": "ssmm",
+        "provider_name": "registry.terraform.io/hashicorp/aws",
+        "schema_version": 0,
+        "sensitive_values": {
+         "cidr_blocks": [],
+         "dns_entry": [
+          {},
+          {},
+          {},
+          {}
+         ],
+         "dns_options": [
+          {}
+         ],
+         "network_interface_ids": [
+          false,
+          false
+         ],
+         "route_table_ids": [],
+         "security_group_ids": [
+          false
+         ],
+         "subnet_configuration": [
+          {},
+          {}
+         ],
+         "subnet_ids": [
+          false,
+          false
+         ],
+         "tags": {},
+         "tags_all": {}
+        },
+        "type": "aws_vpc_endpoint",
+        "values": {
+         "arn": "arn:aws:ec2:ap-northeast-1:021891612086:vpc-endpoint/vpce-0ff78a01377062623",
+         "auto_accept": null,
+         "cidr_blocks": [],
+         "dns_entry": [
+          {
+           "dns_name": "vpce-0ff78a01377062623-8345lg9p.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+           "hosted_zone_id": "Z2E726K9Y6RL4W"
+          },
+          {
+           "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1a.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+           "hosted_zone_id": "Z2E726K9Y6RL4W"
+          },
+          {
+           "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1c.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+           "hosted_zone_id": "Z2E726K9Y6RL4W"
+          },
+          {
+           "dns_name": "ssmmessages.ap-northeast-1.amazonaws.com",
+           "hosted_zone_id": "Z009520329BL8F4YNH6PB"
+          }
+         ],
+         "dns_options": [
+          {
+           "dns_record_ip_type": "ipv4",
+           "private_dns_only_for_inbound_resolver_endpoint": false
+          }
+         ],
+         "id": "vpce-0ff78a01377062623",
+         "ip_address_type": "ipv4",
+         "network_interface_ids": [
+          "eni-01b2ce32a0601b18d",
+          "eni-0d3075377c30894b7"
+         ],
+         "owner_id": "021891612086",
+         "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+         "prefix_list_id": null,
+         "private_dns_enabled": true,
+         "requester_managed": false,
+         "resource_configuration_arn": "",
+         "route_table_ids": [],
+         "security_group_ids": [
+          "sg-097b4fce8f4e6e300"
+         ],
+         "service_name": "com.amazonaws.ap-northeast-1.ssmmessages",
+         "service_network_arn": "",
+         "service_region": "ap-northeast-1",
+         "state": "available",
+         "subnet_configuration": [
+          {
+           "ipv4": "10.10.3.72",
+           "ipv6": "",
+           "subnet_id": "subnet-0005a361752a78b57"
+          },
+          {
+           "ipv4": "10.10.4.15",
+           "ipv6": "",
+           "subnet_id": "subnet-067ee653df50cef08"
+          }
+         ],
+         "subnet_ids": [
+          "subnet-0005a361752a78b57",
+          "subnet-067ee653df50cef08"
+         ],
+         "tags": {
+          "Name": "ssmm-kse-hp-stg"
+         },
+         "tags_all": {
+          "Name": "ssmm-kse-hp-stg"
+         },
+         "timeouts": null,
+         "vpc_endpoint_type": "Interface",
+         "vpc_id": "vpc-030f88f0accdceb65"
+        }
        }
       ]
      }
@@ -15257,15 +16006,27 @@
  "relevant_attributes": [
   {
    "attribute": [
-    "dns_name"
+    "arn"
+   ],
+   "resource": "module.alb.aws_lb_target_group.rails"
+  },
+  {
+   "attribute": [
+    "zone_id"
    ],
    "resource": "module.alb.aws_lb.alb"
   },
   {
    "attribute": [
-    "bucket_regional_domain_name"
+    "name"
    ],
-   "resource": "module.app_bucket.aws_s3_bucket.this"
+   "resource": "module.next_service.aws_ecs_service.this"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.security.aws_security_group.rails"
   },
   {
    "attribute": [
@@ -15275,9 +16036,51 @@
   },
   {
    "attribute": [
-    "name"
+    "repository_url"
    ],
-   "resource": "module.rails_service.aws_ecs_service.this"
+   "resource": "module.next_ecr.aws_ecr_repository.this"
+  },
+  {
+   "attribute": [
+    "dns_name"
+   ],
+   "resource": "module.alb.aws_lb.alb"
+  },
+  {
+   "attribute": [
+    "value"
+   ],
+   "resource": "module.db_password.aws_ssm_parameter.this"
+  },
+  {
+   "attribute": [
+    "arn"
+   ],
+   "resource": "module.app_bucket.aws_s3_bucket.this"
+  },
+  {
+   "attribute": [
+    "fqdn"
+   ],
+   "resource": "module.stg_route53.aws_route53_record.this"
+  },
+  {
+   "attribute": [
+    "result"
+   ],
+   "resource": "module.db_password.random_password.master"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.security.aws_security_group.ecr_vpce"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.network.aws_vpc.vpc"
   },
   {
    "attribute": [
@@ -15291,51 +16094,15 @@
   },
   {
    "attribute": [
-    "zone_id"
+    "family"
    ],
-   "resource": "module.alb.aws_lb.alb"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.vpce.aws_vpc_endpoint.s3"
+   "resource": "module.next_task.aws_ecs_task_definition.this"
   },
   {
    "attribute": [
     "arn"
    ],
-   "resource": "module.app_bucket.aws_s3_bucket.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.db.aws_db_instance.this"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
-   "resource": "module.env_bucket.aws_s3_bucket.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.network.aws_route_table.private"
-  },
-  {
-   "attribute": [
-    "name"
-   ],
-   "resource": "module.private_dns.aws_service_discovery_private_dns_namespace.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.security.aws_security_group.alb"
+   "resource": "module.task_iam.aws_iam_role.exec"
   },
   {
    "attribute": [
@@ -15347,73 +16114,13 @@
    "attribute": [
     "id"
    ],
-   "resource": "module.security.aws_security_group.ecr_vpce"
-  },
-  {
-   "attribute": [
-    "name"
-   ],
-   "resource": "module.next_service.aws_ecs_service.this"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
-   "resource": "module.alb.aws_lb_target_group.rails"
-  },
-  {
-   "attribute": [
-    "bucket_domain_name"
-   ],
-   "resource": "module.app_bucket.aws_s3_bucket.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.app_bucket.aws_s3_bucket.this"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
-   "resource": "module.next_service.aws_service_discovery_service.this"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
-   "resource": "module.rails_master_key.aws_secretsmanager_secret.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.security.aws_security_group.cwlogs_vpce"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.security.aws_security_group.rails"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.security.aws_security_group.db"
+   "resource": "module.security.aws_security_group.ssmm_vpce"
   },
   {
    "attribute": [
     "name"
    ],
    "resource": "module.cluster.aws_ecs_cluster.this"
-  },
-  {
-   "attribute": [
-    "value"
-   ],
-   "resource": "module.db_password.aws_ssm_parameter.this"
   },
   {
    "attribute": [
@@ -15425,13 +16132,19 @@
    "attribute": [
     "arn"
    ],
-   "resource": "module.task_iam.aws_iam_role.exec"
+   "resource": "module.rails_service.aws_service_discovery_service.this"
+  },
+  {
+   "attribute": [
+    "name"
+   ],
+   "resource": "module.private_dns.aws_service_discovery_private_dns_namespace.this"
   },
   {
    "attribute": [
     "arn"
    ],
-   "resource": "module.alb.aws_lb_listener.https"
+   "resource": "module.rails_task.aws_ecs_task_definition.this"
   },
   {
    "attribute": [
@@ -15441,15 +16154,9 @@
   },
   {
    "attribute": [
-    "result"
+    "id"
    ],
-   "resource": "module.db_password.random_password.master"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
-   "resource": "module.rails_task.aws_ecs_task_definition.this"
+   "resource": "module.app_bucket.aws_s3_bucket.this"
   },
   {
    "attribute": [
@@ -15459,15 +16166,15 @@
   },
   {
    "attribute": [
-    "repository_url"
+    "arn"
    ],
-   "resource": "module.rails_ecr.aws_ecr_repository.this"
+   "resource": "module.next_service.aws_service_discovery_service.this"
   },
   {
    "attribute": [
-    "id"
+    "fqdn"
    ],
-   "resource": "module.security.aws_security_group.sm_vpce"
+   "resource": "module.stg_cdn_route53.aws_route53_record.this"
   },
   {
    "attribute": [],
@@ -15475,9 +16182,27 @@
   },
   {
    "attribute": [
-    "fqdn"
+    "id"
    ],
-   "resource": "module.stg_route53.aws_route53_record.this"
+   "resource": "module.network.aws_route_table.private"
+  },
+  {
+   "attribute": [
+    "arn"
+   ],
+   "resource": "module.alb.aws_lb_listener.https"
+  },
+  {
+   "attribute": [
+    "name"
+   ],
+   "resource": "module.rails_service.aws_ecs_service.this"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.security.aws_security_group.cwlogs_vpce"
   },
   {
    "attribute": [
@@ -15487,9 +16212,51 @@
   },
   {
    "attribute": [
-    "family"
+    "arn"
    ],
-   "resource": "module.rails_task.aws_ecs_task_definition.this"
+   "resource": "module.cloudfront.aws_cloudfront_distribution.cdn"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.db.aws_db_instance.this"
+  },
+  {
+   "attribute": [
+    "bucket_regional_domain_name"
+   ],
+   "resource": "module.app_bucket.aws_s3_bucket.this"
+  },
+  {
+   "attribute": [
+    "name"
+   ],
+   "resource": "module.rails_log_group.aws_cloudwatch_log_group.this"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.security.aws_security_group.db"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.vpce.aws_vpc_endpoint.s3"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.cluster.aws_ecs_cluster.this"
+  },
+  {
+   "attribute": [
+    "arn"
+   ],
+   "resource": "module.next_task.aws_ecs_task_definition.this"
   },
   {
    "attribute": [
@@ -15501,61 +16268,49 @@
    "attribute": [
     "arn"
    ],
-   "resource": "module.next_task.aws_ecs_task_definition.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.cluster.aws_ecs_cluster.this"
-  },
-  {
-   "attribute": [
-    "fqdn"
-   ],
-   "resource": "module.stg_cdn_route53.aws_route53_record.this"
-  },
-  {
-   "attribute": [
-    "id"
-   ],
-   "resource": "module.network.aws_vpc.vpc"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
-   "resource": "module.cloudfront.aws_cloudfront_distribution.cdn"
-  },
-  {
-   "attribute": [
-    "family"
-   ],
-   "resource": "module.next_task.aws_ecs_task_definition.this"
-  },
-  {
-   "attribute": [
-    "arn"
-   ],
    "resource": "module.task_iam.aws_iam_role.task"
+  },
+  {
+   "attribute": [
+    "bucket_domain_name"
+   ],
+   "resource": "module.app_bucket.aws_s3_bucket.this"
+  },
+  {
+   "attribute": [
+    "arn"
+   ],
+   "resource": "module.env_bucket.aws_s3_bucket.this"
   },
   {
    "attribute": [
     "repository_url"
    ],
-   "resource": "module.next_ecr.aws_ecr_repository.this"
+   "resource": "module.rails_ecr.aws_ecr_repository.this"
   },
   {
    "attribute": [
     "arn"
    ],
-   "resource": "module.rails_service.aws_service_discovery_service.this"
+   "resource": "module.rails_master_key.aws_secretsmanager_secret.this"
   },
   {
    "attribute": [
-    "name"
+    "family"
    ],
-   "resource": "module.rails_log_group.aws_cloudwatch_log_group.this"
+   "resource": "module.rails_task.aws_ecs_task_definition.this"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.security.aws_security_group.sm_vpce"
+  },
+  {
+   "attribute": [
+    "id"
+   ],
+   "resource": "module.security.aws_security_group.alb"
   }
  ],
  "resource_changes": [
@@ -16086,7 +16841,7 @@
        "healthy_threshold": 3,
        "interval": 60,
        "matcher": "200",
-       "path": "/",
+       "path": "/plans",
        "port": "traffic-port",
        "protocol": "HTTP",
        "timeout": 30,
@@ -16198,7 +16953,7 @@
        "healthy_threshold": 3,
        "interval": 60,
        "matcher": "200",
-       "path": "/",
+       "path": "/plans",
        "port": "traffic-port",
        "protocol": "HTTP",
        "timeout": 30,
@@ -16573,7 +17328,7 @@
      "logging": [],
      "object_lock_configuration": [],
      "object_lock_enabled": false,
-     "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
+     "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
      "region": "ap-northeast-1",
      "replication_configuration": [],
      "request_payer": "BucketOwner",
@@ -16669,7 +17424,7 @@
      "logging": [],
      "object_lock_configuration": [],
      "object_lock_enabled": false,
-     "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
+     "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}",
      "region": "ap-northeast-1",
      "replication_configuration": [],
      "request_payer": "BucketOwner",
@@ -16834,14 +17589,14 @@
     "after": {
      "bucket": "kse-hp-stg",
      "id": "kse-hp-stg",
-     "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
+     "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
     },
     "after_sensitive": {},
     "after_unknown": {},
     "before": {
      "bucket": "kse-hp-stg",
      "id": "kse-hp-stg",
-     "policy": "{\"Statement\":[{\"Action\":[\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
+     "policy": "{\"Statement\":[{\"Action\":[\"s3:PutObject\",\"s3:ListBucket\",\"s3:GetObject\"],\"Condition\":{\"StringEquals\":{\"aws:sourceVpce\":\"vpce-08d78ba0bd6e1502f\"}},\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":[\"arn:aws:s3:::kse-hp-stg/*\",\"arn:aws:s3:::kse-hp-stg\"],\"Sid\":\"AllowVPCEndpointAccess\"}],\"Version\":\"2012-10-17\"}"
     },
     "before_sensitive": {}
    },
@@ -19744,7 +20499,7 @@
      ],
      "tags": {},
      "tags_all": {},
-     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-next:52",
+     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-next:73",
      "timeouts": null,
      "triggers": {},
      "volume_configuration": [],
@@ -20462,7 +21217,7 @@
      ],
      "tags": {},
      "tags_all": {},
-     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-rails:66",
+     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-rails:95",
      "timeouts": null,
      "triggers": {},
      "volume_configuration": [],
@@ -21820,6 +22575,158 @@
    "type": "aws_security_group"
   },
   {
+   "address": "module.security.aws_security_group.ssmm_vpce",
+   "change": {
+    "actions": [
+     "no-op"
+    ],
+    "after": {
+     "arn": "arn:aws:ec2:ap-northeast-1:021891612086:security-group/sg-097b4fce8f4e6e300",
+     "description": "Managed by Terraform",
+     "egress": [
+      {
+       "cidr_blocks": [
+        "0.0.0.0/0"
+       ],
+       "description": "",
+       "from_port": 0,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "-1",
+       "security_groups": [],
+       "self": false,
+       "to_port": 0
+      }
+     ],
+     "id": "sg-097b4fce8f4e6e300",
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "description": "HTTPS from ECS tasks",
+       "from_port": 443,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "tcp",
+       "security_groups": [
+        "sg-048137c8de74def11",
+        "sg-0a1de64b8339079d4"
+       ],
+       "self": false,
+       "to_port": 443
+      }
+     ],
+     "name": "ssmm-vpce-kse-hp-stg",
+     "name_prefix": "",
+     "owner_id": "021891612086",
+     "revoke_rules_on_delete": false,
+     "tags": {},
+     "tags_all": {},
+     "timeouts": null,
+     "vpc_id": "vpc-030f88f0accdceb65"
+    },
+    "after_sensitive": {
+     "egress": [
+      {
+       "cidr_blocks": [
+        false
+       ],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": []
+      }
+     ],
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": [
+        false,
+        false
+       ]
+      }
+     ],
+     "tags": {},
+     "tags_all": {}
+    },
+    "after_unknown": {},
+    "before": {
+     "arn": "arn:aws:ec2:ap-northeast-1:021891612086:security-group/sg-097b4fce8f4e6e300",
+     "description": "Managed by Terraform",
+     "egress": [
+      {
+       "cidr_blocks": [
+        "0.0.0.0/0"
+       ],
+       "description": "",
+       "from_port": 0,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "-1",
+       "security_groups": [],
+       "self": false,
+       "to_port": 0
+      }
+     ],
+     "id": "sg-097b4fce8f4e6e300",
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "description": "HTTPS from ECS tasks",
+       "from_port": 443,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "tcp",
+       "security_groups": [
+        "sg-048137c8de74def11",
+        "sg-0a1de64b8339079d4"
+       ],
+       "self": false,
+       "to_port": 443
+      }
+     ],
+     "name": "ssmm-vpce-kse-hp-stg",
+     "name_prefix": "",
+     "owner_id": "021891612086",
+     "revoke_rules_on_delete": false,
+     "tags": {},
+     "tags_all": {},
+     "timeouts": null,
+     "vpc_id": "vpc-030f88f0accdceb65"
+    },
+    "before_sensitive": {
+     "egress": [
+      {
+       "cidr_blocks": [
+        false
+       ],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": []
+      }
+     ],
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": [
+        false,
+        false
+       ]
+      }
+     ],
+     "tags": {},
+     "tags_all": {}
+    }
+   },
+   "mode": "managed",
+   "module_address": "module.security",
+   "name": "ssmm_vpce",
+   "provider_name": "registry.terraform.io/hashicorp/aws",
+   "type": "aws_security_group"
+  },
+  {
    "address": "module.ssm.aws_ssm_parameter.this[\"CLUSTER_NAME\"]",
    "change": {
     "actions": [
@@ -22965,6 +23872,54 @@
    "type": "aws_iam_policy"
   },
   {
+   "address": "module.task_iam.aws_iam_policy.ecs_exec_ssm",
+   "change": {
+    "actions": [
+     "no-op"
+    ],
+    "after": {
+     "arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+     "attachment_count": 1,
+     "description": "",
+     "id": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+     "name": "ecs_exec_ssm-kse-hp-stg",
+     "name_prefix": "",
+     "path": "/",
+     "policy": "{\"Statement\":[{\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+     "policy_id": "ANPAQKGGXPW3PR3476RK5",
+     "tags": {},
+     "tags_all": {}
+    },
+    "after_sensitive": {
+     "tags": {},
+     "tags_all": {}
+    },
+    "after_unknown": {},
+    "before": {
+     "arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+     "attachment_count": 1,
+     "description": "",
+     "id": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+     "name": "ecs_exec_ssm-kse-hp-stg",
+     "name_prefix": "",
+     "path": "/",
+     "policy": "{\"Statement\":[{\"Action\":[\"ssmmessages:OpenDataChannel\",\"ssmmessages:OpenControlChannel\",\"ssmmessages:CreateDataChannel\",\"ssmmessages:CreateControlChannel\"],\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"2012-10-17\"}",
+     "policy_id": "ANPAQKGGXPW3PR3476RK5",
+     "tags": {},
+     "tags_all": {}
+    },
+    "before_sensitive": {
+     "tags": {},
+     "tags_all": {}
+    }
+   },
+   "mode": "managed",
+   "module_address": "module.task_iam",
+   "name": "ecs_exec_ssm",
+   "provider_name": "registry.terraform.io/hashicorp/aws",
+   "type": "aws_iam_policy"
+  },
+  {
    "address": "module.task_iam.aws_iam_policy.env_bucket_read",
    "change": {
     "actions": [
@@ -23153,7 +24108,8 @@
      "id": "task-role-kse-hp-stg",
      "inline_policy": [],
      "managed_policy_arns": [
-      "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg"
+      "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg",
+      "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg"
      ],
      "max_session_duration": 3600,
      "name": "task-role-kse-hp-stg",
@@ -23167,6 +24123,7 @@
     "after_sensitive": {
      "inline_policy": [],
      "managed_policy_arns": [
+      false,
       false
      ],
      "tags": {},
@@ -23182,7 +24139,8 @@
      "id": "task-role-kse-hp-stg",
      "inline_policy": [],
      "managed_policy_arns": [
-      "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg"
+      "arn:aws:iam::021891612086:policy/app-s3-read-kse-hp-stg",
+      "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg"
      ],
      "max_session_duration": 3600,
      "name": "task-role-kse-hp-stg",
@@ -23196,6 +24154,7 @@
     "before_sensitive": {
      "inline_policy": [],
      "managed_policy_arns": [
+      false,
       false
      ],
      "tags": {},
@@ -23309,6 +24268,32 @@
    "mode": "managed",
    "module_address": "module.task_iam",
    "name": "task_app_bucket_attach",
+   "provider_name": "registry.terraform.io/hashicorp/aws",
+   "type": "aws_iam_role_policy_attachment"
+  },
+  {
+   "address": "module.task_iam.aws_iam_role_policy_attachment.task_ecs_exec_ssm_attach",
+   "change": {
+    "actions": [
+     "no-op"
+    ],
+    "after": {
+     "id": "task-role-kse-hp-stg-20250805133544434200000001",
+     "policy_arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+     "role": "task-role-kse-hp-stg"
+    },
+    "after_sensitive": {},
+    "after_unknown": {},
+    "before": {
+     "id": "task-role-kse-hp-stg-20250805133544434200000001",
+     "policy_arn": "arn:aws:iam::021891612086:policy/ecs_exec_ssm-kse-hp-stg",
+     "role": "task-role-kse-hp-stg"
+    },
+    "before_sensitive": {}
+   },
+   "mode": "managed",
+   "module_address": "module.task_iam",
+   "name": "task_ecs_exec_ssm_attach",
    "provider_name": "registry.terraform.io/hashicorp/aws",
    "type": "aws_iam_role_policy_attachment"
   },
@@ -24437,6 +25422,228 @@
    "name": "secretsmanager",
    "provider_name": "registry.terraform.io/hashicorp/aws",
    "type": "aws_vpc_endpoint"
+  },
+  {
+   "address": "module.vpce.aws_vpc_endpoint.ssmm",
+   "change": {
+    "actions": [
+     "no-op"
+    ],
+    "after": {
+     "arn": "arn:aws:ec2:ap-northeast-1:021891612086:vpc-endpoint/vpce-0ff78a01377062623",
+     "auto_accept": null,
+     "cidr_blocks": [],
+     "dns_entry": [
+      {
+       "dns_name": "vpce-0ff78a01377062623-8345lg9p.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+       "hosted_zone_id": "Z2E726K9Y6RL4W"
+      },
+      {
+       "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1a.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+       "hosted_zone_id": "Z2E726K9Y6RL4W"
+      },
+      {
+       "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1c.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+       "hosted_zone_id": "Z2E726K9Y6RL4W"
+      },
+      {
+       "dns_name": "ssmmessages.ap-northeast-1.amazonaws.com",
+       "hosted_zone_id": "Z009520329BL8F4YNH6PB"
+      }
+     ],
+     "dns_options": [
+      {
+       "dns_record_ip_type": "ipv4",
+       "private_dns_only_for_inbound_resolver_endpoint": false
+      }
+     ],
+     "id": "vpce-0ff78a01377062623",
+     "ip_address_type": "ipv4",
+     "network_interface_ids": [
+      "eni-01b2ce32a0601b18d",
+      "eni-0d3075377c30894b7"
+     ],
+     "owner_id": "021891612086",
+     "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+     "prefix_list_id": null,
+     "private_dns_enabled": true,
+     "requester_managed": false,
+     "resource_configuration_arn": "",
+     "route_table_ids": [],
+     "security_group_ids": [
+      "sg-097b4fce8f4e6e300"
+     ],
+     "service_name": "com.amazonaws.ap-northeast-1.ssmmessages",
+     "service_network_arn": "",
+     "service_region": "ap-northeast-1",
+     "state": "available",
+     "subnet_configuration": [
+      {
+       "ipv4": "10.10.3.72",
+       "ipv6": "",
+       "subnet_id": "subnet-0005a361752a78b57"
+      },
+      {
+       "ipv4": "10.10.4.15",
+       "ipv6": "",
+       "subnet_id": "subnet-067ee653df50cef08"
+      }
+     ],
+     "subnet_ids": [
+      "subnet-0005a361752a78b57",
+      "subnet-067ee653df50cef08"
+     ],
+     "tags": {
+      "Name": "ssmm-kse-hp-stg"
+     },
+     "tags_all": {
+      "Name": "ssmm-kse-hp-stg"
+     },
+     "timeouts": null,
+     "vpc_endpoint_type": "Interface",
+     "vpc_id": "vpc-030f88f0accdceb65"
+    },
+    "after_sensitive": {
+     "cidr_blocks": [],
+     "dns_entry": [
+      {},
+      {},
+      {},
+      {}
+     ],
+     "dns_options": [
+      {}
+     ],
+     "network_interface_ids": [
+      false,
+      false
+     ],
+     "route_table_ids": [],
+     "security_group_ids": [
+      false
+     ],
+     "subnet_configuration": [
+      {},
+      {}
+     ],
+     "subnet_ids": [
+      false,
+      false
+     ],
+     "tags": {},
+     "tags_all": {}
+    },
+    "after_unknown": {},
+    "before": {
+     "arn": "arn:aws:ec2:ap-northeast-1:021891612086:vpc-endpoint/vpce-0ff78a01377062623",
+     "auto_accept": null,
+     "cidr_blocks": [],
+     "dns_entry": [
+      {
+       "dns_name": "vpce-0ff78a01377062623-8345lg9p.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+       "hosted_zone_id": "Z2E726K9Y6RL4W"
+      },
+      {
+       "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1a.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+       "hosted_zone_id": "Z2E726K9Y6RL4W"
+      },
+      {
+       "dns_name": "vpce-0ff78a01377062623-8345lg9p-ap-northeast-1c.ssmmessages.ap-northeast-1.vpce.amazonaws.com",
+       "hosted_zone_id": "Z2E726K9Y6RL4W"
+      },
+      {
+       "dns_name": "ssmmessages.ap-northeast-1.amazonaws.com",
+       "hosted_zone_id": "Z009520329BL8F4YNH6PB"
+      }
+     ],
+     "dns_options": [
+      {
+       "dns_record_ip_type": "ipv4",
+       "private_dns_only_for_inbound_resolver_endpoint": false
+      }
+     ],
+     "id": "vpce-0ff78a01377062623",
+     "ip_address_type": "ipv4",
+     "network_interface_ids": [
+      "eni-01b2ce32a0601b18d",
+      "eni-0d3075377c30894b7"
+     ],
+     "owner_id": "021891612086",
+     "policy": "{\"Statement\":[{\"Action\":\"*\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Resource\":\"*\"}]}",
+     "prefix_list_id": null,
+     "private_dns_enabled": true,
+     "requester_managed": false,
+     "resource_configuration_arn": "",
+     "route_table_ids": [],
+     "security_group_ids": [
+      "sg-097b4fce8f4e6e300"
+     ],
+     "service_name": "com.amazonaws.ap-northeast-1.ssmmessages",
+     "service_network_arn": "",
+     "service_region": "ap-northeast-1",
+     "state": "available",
+     "subnet_configuration": [
+      {
+       "ipv4": "10.10.3.72",
+       "ipv6": "",
+       "subnet_id": "subnet-0005a361752a78b57"
+      },
+      {
+       "ipv4": "10.10.4.15",
+       "ipv6": "",
+       "subnet_id": "subnet-067ee653df50cef08"
+      }
+     ],
+     "subnet_ids": [
+      "subnet-0005a361752a78b57",
+      "subnet-067ee653df50cef08"
+     ],
+     "tags": {
+      "Name": "ssmm-kse-hp-stg"
+     },
+     "tags_all": {
+      "Name": "ssmm-kse-hp-stg"
+     },
+     "timeouts": null,
+     "vpc_endpoint_type": "Interface",
+     "vpc_id": "vpc-030f88f0accdceb65"
+    },
+    "before_sensitive": {
+     "cidr_blocks": [],
+     "dns_entry": [
+      {},
+      {},
+      {},
+      {}
+     ],
+     "dns_options": [
+      {}
+     ],
+     "network_interface_ids": [
+      false,
+      false
+     ],
+     "route_table_ids": [],
+     "security_group_ids": [
+      false
+     ],
+     "subnet_configuration": [
+      {},
+      {}
+     ],
+     "subnet_ids": [
+      false,
+      false
+     ],
+     "tags": {},
+     "tags_all": {}
+    }
+   },
+   "mode": "managed",
+   "module_address": "module.vpce",
+   "name": "ssmm",
+   "provider_name": "registry.terraform.io/hashicorp/aws",
+   "type": "aws_vpc_endpoint"
   }
  ],
  "resource_drift": [
@@ -24510,7 +25717,7 @@
      ],
      "tags": {},
      "tags_all": {},
-     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-next:52",
+     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-next:73",
      "timeouts": null,
      "triggers": {},
      "volume_configuration": [],
@@ -24736,7 +25943,7 @@
      ],
      "tags": {},
      "tags_all": {},
-     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-rails:66",
+     "task_definition": "arn:aws:ecs:ap-northeast-1:021891612086:task-definition/kse-hp-stg-rails:95",
      "timeouts": null,
      "triggers": {},
      "volume_configuration": [],
@@ -24891,10 +26098,161 @@
    "name": "this",
    "provider_name": "registry.terraform.io/hashicorp/aws",
    "type": "aws_ecs_service"
+  },
+  {
+   "address": "module.security.aws_security_group.ssmm_vpce",
+   "change": {
+    "actions": [
+     "update"
+    ],
+    "after": {
+     "arn": "arn:aws:ec2:ap-northeast-1:021891612086:security-group/sg-097b4fce8f4e6e300",
+     "description": "Managed by Terraform",
+     "egress": [
+      {
+       "cidr_blocks": [
+        "0.0.0.0/0"
+       ],
+       "description": "",
+       "from_port": 0,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "-1",
+       "security_groups": [],
+       "self": false,
+       "to_port": 0
+      }
+     ],
+     "id": "sg-097b4fce8f4e6e300",
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "description": "HTTPS from ECS tasks",
+       "from_port": 443,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "tcp",
+       "security_groups": [
+        "sg-048137c8de74def11",
+        "sg-0a1de64b8339079d4"
+       ],
+       "self": false,
+       "to_port": 443
+      }
+     ],
+     "name": "ssmm-vpce-kse-hp-stg",
+     "name_prefix": "",
+     "owner_id": "021891612086",
+     "revoke_rules_on_delete": false,
+     "tags": {},
+     "tags_all": {},
+     "timeouts": null,
+     "vpc_id": "vpc-030f88f0accdceb65"
+    },
+    "after_sensitive": {
+     "egress": [
+      {
+       "cidr_blocks": [
+        false
+       ],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": []
+      }
+     ],
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": [
+        false,
+        false
+       ]
+      }
+     ],
+     "tags": {},
+     "tags_all": {}
+    },
+    "after_unknown": {},
+    "before": {
+     "arn": "arn:aws:ec2:ap-northeast-1:021891612086:security-group/sg-097b4fce8f4e6e300",
+     "description": "Managed by Terraform",
+     "egress": [
+      {
+       "cidr_blocks": [
+        "0.0.0.0/0"
+       ],
+       "description": "",
+       "from_port": 0,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "-1",
+       "security_groups": [],
+       "self": false,
+       "to_port": 0
+      }
+     ],
+     "id": "sg-097b4fce8f4e6e300",
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "description": "HTTPS from ECS tasks",
+       "from_port": 443,
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "protocol": "tcp",
+       "security_groups": [
+        "sg-048137c8de74def11",
+        "sg-0a1de64b8339079d4"
+       ],
+       "self": false,
+       "to_port": 443
+      }
+     ],
+     "name": "ssmm-vpce-kse-hp-stg",
+     "name_prefix": "",
+     "owner_id": "021891612086",
+     "revoke_rules_on_delete": false,
+     "tags": null,
+     "tags_all": {},
+     "timeouts": null,
+     "vpc_id": "vpc-030f88f0accdceb65"
+    },
+    "before_sensitive": {
+     "egress": [
+      {
+       "cidr_blocks": [
+        false
+       ],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": []
+      }
+     ],
+     "ingress": [
+      {
+       "cidr_blocks": [],
+       "ipv6_cidr_blocks": [],
+       "prefix_list_ids": [],
+       "security_groups": [
+        false,
+        false
+       ]
+      }
+     ],
+     "tags_all": {}
+    }
+   },
+   "mode": "managed",
+   "module_address": "module.security",
+   "name": "ssmm_vpce",
+   "provider_name": "registry.terraform.io/hashicorp/aws",
+   "type": "aws_security_group"
   }
  ],
  "terraform_version": "1.12.2",
- "timestamp": "2025-08-04T14:33:27Z",
+ "timestamp": "2025-08-06T05:46:40Z",
  "variables": {
   "app_ports": {
    "value": [
