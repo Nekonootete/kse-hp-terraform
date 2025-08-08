@@ -98,14 +98,6 @@ module "stg_route53" {
   alb_zone_id  = module.alb.zone_id
 }
 
-module "www_route53" {
-  source       = "../../modules/route53"
-  fqdn         = "www.${var.fqdn}"
-  zone_id      = data.terraform_remote_state.global.outputs.zone_id
-  alb_dns_name = module.alb.dns_name
-  alb_zone_id  = module.alb.zone_id
-}
-
 module "stg_cdn_route53" {
   source       = "../../modules/route53"
   fqdn         = var.cdn_fqdn
