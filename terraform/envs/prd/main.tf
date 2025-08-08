@@ -93,7 +93,7 @@ module "alb" {
 module "route53" {
   source       = "../../modules/route53"
   domain_name  = var.domain_name
-  fqdn         = "${var.fqdn}"
+  fqdn         = var.fqdn
   zone_id      = data.terraform_remote_state.global.outputs.zone_id
   alb_dns_name = module.alb.dns_name
   alb_zone_id  = module.alb.zone_id
