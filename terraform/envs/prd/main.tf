@@ -255,7 +255,7 @@ module "rails_task" {
 module "private_dns" {
   source = "../../modules/private_dns"
   vpc_id = module.network.vpc_id
-  name   = "internal-${ var.project_name }-${ var.environment }"
+  name   = "internal-${var.project_name}-${var.environment}"
 }
 
 module "next_service" {
