@@ -176,7 +176,7 @@ module "cluster" {
 
 module "rails_master_key" {
   source    = "../../modules/secrets"
-  name      = var.project_name
+  name      = "${var.project_name}-${var.environment}-rails-master-key"
   file_path = "${path.root}/config/credentials/production.key"
 }
 
@@ -244,7 +244,7 @@ module "rails_task" {
 module "private_dns" {
   source = "../../modules/private_dns"
   vpc_id = module.network.vpc_id
-  name   = "internal"
+  name   = "internal-${var.project_name}-${var.environment}"
 }
 
 module "next_service" {
