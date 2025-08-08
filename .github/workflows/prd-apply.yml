@@ -1,0 +1,102 @@
+name: Terraform Production Apply
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: terraform
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-northeast-1
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    defaults:
+      run:
+        working-directory: terraform/envs/prd
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create Rails master key file
+        run: |
+          mkdir -p config/credentials
+          echo -n "${{ secrets.PRODUCTION_KEY }}" > config/credentials/production.key
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform initialize
+        run: terraform init
+
+      - name: Terraform format
+        run: terraform fmt -check -recursive -diff
+
+      - name: Terraform validate
+        run: terraform validate -no-color
+
+      - name: Terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Get outputs
+        run: |
+          keys=(db_address db_name db_username db_password_name app_bucket_id env_bucket_id fqdn cdn_fqdn rails_service_cloud_map private_dns_name)
+          for key in "${keys[@]}"; do
+            val="$(terraform output -raw "$key")"
+            echo "::add-mask::$val"
+            name="$(echo "$key" | tr 'a-z' 'A-Z')"
+            echo "${name}=$val" >> "$GITHUB_ENV"
+          done
+
+      - name: Get DB password from SSM
+        id: dbpw
+        run: |
+          PW=$(aws ssm get-parameter \
+            --name "$DB_PASSWORD_NAME" \
+            --with-decryption \
+            --query 'Parameter.Value' \
+            --output text)
+          echo "::add-mask::$PW"
+          echo "DB_PASSWORD=$PW" >> $GITHUB_ENV
+
+      - name: Build env file for container
+        run: |
+          cat > .env <<EOF
+          DB_HOST=$DB_ADDRESS
+          DB_PORT=5432
+          DB_NAME=$DB_NAME
+          DB_USERNAME=$DB_USERNAME
+          DB_PASSWORD=$DB_PASSWORD
+          ADMIN_USERNAME=$ADMIN_USERNAME
+          ADMIN_PASSWORD=$ADMIN_PASSWORD
+          AWS_REGION=$AWS_REGION
+          AWS_S3_BUCKET=$APP_BUCKET_ID
+          CDN_HOST=$CDN_FQDN
+          CDN_PROTOCOL=https
+          NEXT_PUBLIC_BASE_URL=https://$FQDN
+          RAILS_URL=http://$RAILS_SERVICE_CLOUD_MAP.$PRIVATE_DNS_NAME:3001
+          SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+          EOF
+
+      - name: Upload env file to S3
+        run: |
+          aws s3 cp .env \
+          s3://$ENV_BUCKET_ID/.env \
+          --sse AES256
