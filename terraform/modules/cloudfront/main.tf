@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled         = true
   is_ipv6_enabled = true
   comment         = "CDN in front of ALB (Next.js / Rails)"
-  aliases         = [var.fqdn, var.cdn_fqdn]
+  aliases         = [var.fqdn,"www.${var.fqdn}", var.cdn_fqdn]
 
   origin {
     domain_name = var.alb_dns_name
