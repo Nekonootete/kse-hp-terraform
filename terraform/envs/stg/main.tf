@@ -90,6 +90,16 @@ module "alb" {
   acm_cert_arn      = data.terraform_remote_state.global.outputs.acm_certificate_arn
 }
 
+module "cloudfront" {
+  source                          = "../../modules/cloudfront"
+  environment                     = var.environment
+  project_name                    = var.project_name
+  domain_name                     = var.domain_name
+  fqdn                            = var.fqdn
+  cdn_fqdn                        = var.cdn_fqdn
+  alb_dns_name                    = module.alb.dns_name
+}
+
 module "stg_route53" {
   source       = "../../modules/route53"
   domain_name  = var.domain_name
@@ -139,18 +149,6 @@ module "env_bucket" {
   environment   = var.environment
   project_name  = var.project_name
   env_file_name = var.env_file_name
-}
-
-module "cloudfront" {
-  source                          = "../../modules/cloudfront"
-  environment                     = var.environment
-  project_name                    = var.project_name
-  domain_name                     = var.domain_name
-  fqdn                            = var.fqdn
-  cdn_fqdn                        = var.cdn_fqdn
-  alb_dns_name                    = module.alb.dns_name
-  app_bucket_domain_name          = module.app_bucket.bucket_domain_name
-  app_bucket_regional_domain_name = module.app_bucket.bucket_regional_domain_name
 }
 
 module "app_bucket_policy" {
