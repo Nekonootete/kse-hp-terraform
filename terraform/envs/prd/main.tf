@@ -91,13 +91,13 @@ module "alb" {
 }
 
 module "cloudfront" {
-  source                          = "../../modules/cloudfront"
-  environment                     = var.environment
-  project_name                    = var.project_name
-  domain_name                     = var.domain_name
-  fqdn                            = var.fqdn
-  cdn_fqdn                        = var.cdn_fqdn
-  alb_dns_name                    = module.alb.dns_name
+  source       = "../../modules/cloudfront"
+  environment  = var.environment
+  project_name = var.project_name
+  domain_name  = var.domain_name
+  fqdn         = var.fqdn
+  cdn_fqdn     = var.cdn_fqdn
+  alb_dns_name = module.alb.dns_name
 }
 
 module "route53" {
