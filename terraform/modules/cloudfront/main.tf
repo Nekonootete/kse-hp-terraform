@@ -86,6 +86,17 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   ordered_cache_behavior {
+    path_pattern             = "/images/*"
+    target_origin_id         = "alb-${var.project_name}-${var.environment}"
+    viewer_protocol_policy   = "https-only"
+    allowed_methods          = ["GET", "HEAD"]
+    cached_methods           = ["GET", "HEAD"]
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.no_forward.id
+    cache_policy_id          = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    compress                 = true
+  }
+
+  ordered_cache_behavior {
   path_pattern             = "/rails/active_storage/*"
   target_origin_id         = "alb-${var.project_name}-${var.environment}"
   viewer_protocol_policy   = "https-only"
