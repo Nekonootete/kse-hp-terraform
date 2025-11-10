@@ -28,8 +28,6 @@ locals {
     NEXT_TASK_DEF           = module.next_task.task_definition_arn
     RAILS_TASK_DEF          = module.rails_task.task_definition_arn
     NEXT_SERVICE_NAME       = module.next_service.name
-    NEXT_SERVICE_NAME       = module.next_service.name
-    RAILS_SERVICE_NAME      = module.rails_service.name
     RAILS_SERVICE_NAME      = module.rails_service.name
     NEXT_CONTAINER_NAME     = module.next_task.container_name
     RAILS_CONTAINER_NAME    = module.rails_task.container_name
