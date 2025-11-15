@@ -141,7 +141,7 @@ module "db" {
   db_name              = var.db_name
   db_username          = var.db_username
   skip_final_snap_shot = true
-  private_subnet_ids   = [module.network.private_subnet_ids[0]]
+  private_subnet_ids   = module.network.private_subnet_ids
   db_sg_id             = module.security.db_sg_id
   db_password_value    = module.db_password.value
 }
