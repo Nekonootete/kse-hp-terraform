@@ -66,7 +66,7 @@ module "security" {
 module "vpce" {
   source                  = "../../modules/vpce"
   environment             = var.environment
-  prject_name             = var.project_name
+  project_name            = var.project_name
   region                  = var.region
   vpc_id                  = module.network.vpc_id
   private_subnet_ids      = module.network.private_subnet_ids
