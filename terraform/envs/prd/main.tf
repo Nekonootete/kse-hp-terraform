@@ -66,7 +66,7 @@ module "security" {
 module "vpce" {
   source                  = "../../modules/vpce"
   environment             = var.environment
-  project_name            = var.project_name
+  prject_name            = var.project_name
   region                  = var.region
   vpc_id                  = module.network.vpc_id
   private_subnet_ids      = module.network.private_subnet_ids
@@ -141,7 +141,7 @@ module "db" {
   db_name              = var.db_name
   db_username          = var.db_username
   skip_final_snap_shot = true
-  private_subnet_ids   = module.network.private_subnet_ids
+  private_subnet_ids   = [module.network.private_subnet_ids[0]]
   db_sg_id             = module.security.db_sg_id
   db_password_value    = module.db_password.value
 }
@@ -261,7 +261,7 @@ module "next_service" {
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.next_service_cloud_map
-  subnet_ids          = module.network.private_subnet_ids
+  subnet_ids          = [module.network.private_subnet_ids[0]]
   sg_id               = module.security.next_sg_id
   cluster_id          = module.cluster.id
   target_group_arn    = module.alb.next_target_group_arn
@@ -269,7 +269,7 @@ module "next_service" {
   container_name      = module.next_task.container_name
   container_port      = var.app_ports[0]
   private_dns_id      = module.private_dns.id
-  desired_count       = 2
+  desired_count       = 1
 }
 
 module "rails_service" {
@@ -277,7 +277,7 @@ module "rails_service" {
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.rails_service_cloud_map
-  subnet_ids          = module.network.private_subnet_ids
+  subnet_ids          = [module.network.private_subnet_ids[0]]
   sg_id               = module.security.rails_sg_id
   cluster_id          = module.cluster.id
   target_group_arn    = module.alb.rails_target_group_arn
@@ -285,5 +285,5 @@ module "rails_service" {
   container_name      = module.rails_task.container_name
   container_port      = var.app_ports[1]
   private_dns_id      = module.private_dns.id
-  desired_count       = 2
+  desired_count       = 1
 }
