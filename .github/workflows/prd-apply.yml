@@ -92,7 +92,9 @@ jobs:
           CDN_PROTOCOL=https
           NEXT_PUBLIC_BASE_URL=https://$FQDN
           RAILS_URL=http://$RAILS_SERVICE_CLOUD_MAP.$PRIVATE_DNS_NAME:3001
-          SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+          SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_EMAIL=${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
+          GOOGLE_PRIVATE_KEY=${{ secrets.GOOGLE_PRIVATE_KEY }}
           EOF
 
       - name: Upload env file to S3
