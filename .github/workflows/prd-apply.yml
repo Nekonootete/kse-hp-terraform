@@ -92,9 +92,7 @@ jobs:
           CDN_PROTOCOL=https
           NEXT_PUBLIC_BASE_URL=https://$FQDN
           RAILS_URL=http://$RAILS_SERVICE_CLOUD_MAP.$PRIVATE_DNS_NAME:3001
-          SPREADSHEET_ID=${{ secrets.SPREADSHEET_ID }}
-          GOOGLE_SERVICE_ACCOUNT_EMAIL=${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }}
-          GOOGLE_PRIVATE_KEY=${{ secrets.GOOGLE_PRIVATE_KEY }}
+          NEXT_PUBLIC_GAS_ENDPOINT=${{ secrets.NEXT_PUBLIC_GAS_ENDPOINT }}
           EOF
 
       - name: Upload env file to S3
