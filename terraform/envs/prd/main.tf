@@ -261,7 +261,7 @@ module "next_service" {
   environment         = var.environment
   project_name        = var.project_name
   service_cloud_map   = var.next_service_cloud_map
-  subnet_ids          = [module.network.private_subnet_ids[0]]
+  subnet_ids          = [module.network.public_subnet_ids[0]]
   sg_id               = module.security.next_sg_id
   cluster_id          = module.cluster.id
   target_group_arn    = module.alb.next_target_group_arn
