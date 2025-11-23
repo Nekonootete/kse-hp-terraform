@@ -26,9 +26,9 @@ resource "aws_ecs_service" "this" {
   enable_execute_command  = true
 
   network_configuration {
-    subnets         = var.subnet_ids
-    security_groups = [var.sg_id]
-    assign_public_ip = false
+    subnets          = var.subnet_ids
+    security_groups  = [var.sg_id]
+    assign_public_ip = var.assign_public_ip
   }
 
   load_balancer {

@@ -3,6 +3,7 @@ variable "project_name"        { type = string }
 variable "subnet_ids"          { type = list(string) }
 variable "sg_id"               { type = string }
 variable "cluster_id"          { type = string }
+variable "assign_public_ip"    { type = bool }
 variable "target_group_arn"    { type = string }
 variable "task_definition_arn" { type = string }
 variable "container_name"      { type = string }

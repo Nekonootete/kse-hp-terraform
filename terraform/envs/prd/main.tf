@@ -264,6 +264,7 @@ module "next_service" {
   subnet_ids          = [module.network.public_subnet_ids[0]]
   sg_id               = module.security.next_sg_id
   cluster_id          = module.cluster.id
+  assign_public_ip    = true
   target_group_arn    = module.alb.next_target_group_arn
   task_definition_arn = module.next_task.task_definition_arn
   container_name      = module.next_task.container_name
@@ -280,6 +281,7 @@ module "rails_service" {
   subnet_ids          = [module.network.private_subnet_ids[0]]
   sg_id               = module.security.rails_sg_id
   cluster_id          = module.cluster.id
+  assign_public_ip    = false
   target_group_arn    = module.alb.rails_target_group_arn
   task_definition_arn = module.rails_task.task_definition_arn
   container_name      = module.rails_task.container_name
